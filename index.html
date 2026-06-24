@@ -1,1 +1,560 @@
-Test
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Czasy realizacji zadań — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js"></script>
+<style>
+  :root{
+    --bg: #F4F6F8;
+    --panel: #FFFFFF;
+    --panel-border: #E1E6EB;
+    --ink: #16212E;
+    --ink-soft: #5C6B7A;
+    --ink-faint: #94A1AE;
+
+    --s-color: #1B9C85;
+    --s-color-soft: #E4F5F1;
+    --m-color: #DD8A1F;
+    --m-color-soft: #FBEEDB;
+    --l-color: #6457C6;
+    --l-color-soft: #ECE9FA;
+    --combined-color: #16212E;
+    --combined-soft: #EDEFF2;
+
+    --ref-line: #C44545;
+
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    --radius-sm: 7px;
+
+    --font-display: 'Space Grotesk', 'Segoe UI', Arial, sans-serif;
+    --font-body: 'Inter', 'Segoe UI', Arial, sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 28px 20px 40px;
+  }
+
+  /* ---------- Header ---------- */
+  .eyebrow{
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 8px;
+  }
+  h1{
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .subtitle{
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0 0 24px;
+  }
+  .subtitle b{ color: var(--ink); font-weight: 600; }
+
+  /* ---------- Filter chips ---------- */
+  .filter-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .filter-label{
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 500;
+    margin-right: 4px;
+  }
+  .chip{
+    appearance: none;
+    border: 1.5px solid var(--panel-border);
+    background: var(--panel);
+    color: var(--ink-soft);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.15s ease;
+  }
+  .chip:hover{ border-color: var(--ink-faint); }
+  .chip .dot{
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--ink-faint);
+    transition: background 0.15s ease;
+  }
+  .chip[data-active="true"][data-size="S"]{ border-color: var(--s-color); background: var(--s-color-soft); color: var(--s-color); }
+  .chip[data-active="true"][data-size="S"] .dot{ background: var(--s-color); }
+  .chip[data-active="true"][data-size="M"]{ border-color: var(--m-color); background: var(--m-color-soft); color: var(--m-color); }
+  .chip[data-active="true"][data-size="M"] .dot{ background: var(--m-color); }
+  .chip[data-active="true"][data-size="L"]{ border-color: var(--l-color); background: var(--l-color-soft); color: var(--l-color); }
+  .chip[data-active="true"][data-size="L"] .dot{ background: var(--l-color); }
+
+  .reset-link{
+    margin-left: auto;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--panel-border);
+    padding: 4px;
+  }
+  .reset-link:hover{ color: var(--ink); }
+
+  /* ---------- Stat cards ---------- */
+  .cards{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-md);
+    padding: 16px 16px 14px;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+  }
+  .card.inactive{ opacity: 0.42; filter: saturate(0.4); }
+  .card.combined{ background: var(--ink); border-color: var(--ink); }
+  .card-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 12px;
+  }
+  .card-name{
+    display:flex; align-items:center; gap:7px;
+    font-family: var(--font-display);
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+  .card-name .dot{ width:9px; height:9px; border-radius:50%; }
+  .card.s .card-name .dot{ background: var(--s-color); }
+  .card.m .card-name .dot{ background: var(--m-color); }
+  .card.l .card-name .dot{ background: var(--l-color); }
+  .card.combined .card-name .dot{ background: #fff; }
+  .card.combined .card-name{ color: #fff; }
+  .card-n{
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+  .card.combined .card-n{ color: #B9C0CA; }
+  .card-stats{
+    display:flex;
+    gap: 10px;
+  }
+  .stat{ flex:1; text-align:left; }
+  .stat-label{
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .card.combined .stat-label{ color: #8E97A3; }
+  .stat-value{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .card.combined .stat-value{ color: #fff; }
+  .stat-value .unit{
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-faint);
+    margin-left: 2px;
+  }
+  .card.combined .stat-value .unit{ color: #8E97A3; }
+  .card-empty{
+    font-size: 13px;
+    color: var(--ink-faint);
+    padding: 6px 0 4px;
+  }
+
+  /* ---------- Chart panel ---------- */
+  .panel{
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    padding: 22px 22px 14px;
+    margin-bottom: 18px;
+  }
+  .panel-head{
+    display:flex;
+    align-items:baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .panel-title{
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .panel-note{
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+  .chart-area{
+    position: relative;
+    height: 420px;
+    margin-top: 10px;
+  }
+
+  .legend-row{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items:center;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--panel-border);
+  }
+  .legend-item{
+    display:flex; align-items:center; gap:7px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .legend-swatch{ width:10px; height:10px; border-radius:50%; }
+  .legend-swatch.s{ background: var(--s-color); }
+  .legend-swatch.m{ background: var(--m-color); }
+  .legend-swatch.l{ background: var(--l-color); }
+  .legend-swatch.ref{
+    width:16px; height:0; border-top: 2px dashed var(--ref-line); border-radius:0;
+  }
+
+  /* ---------- Footer ---------- */
+  .footnote{
+    font-size: 12px;
+    color: var(--ink-faint);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 860px){
+    .cards{ grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px){
+    .cards{ grid-template-columns: 1fr; }
+    .card-stats{ gap: 6px; }
+    h1{ font-size: 23px; }
+    .chart-area{ height: 340px; }
+    .reset-link{ margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Analiza operacyjna · lipiec 2024 – grudzień 2025</p>
+  <h1>Czasy realizacji zadań</h1>
+  <p class="subtitle">Rozrzut czasu realizacji w dniach w czasie, z podziałem na deklarowany rozmiar zadania (<b>S</b> / <b>M</b> / <b>L</b>) oraz percentyle 50 / 85 / 95.</p>
+
+  <div class="filter-row">
+    <span class="filter-label">Filtruj wg rozmiaru:</span>
+    <button class="chip" data-size="S" data-active="true"><span class="dot"></span>S — małe</button>
+    <button class="chip" data-size="M" data-active="true"><span class="dot"></span>M — średnie</button>
+    <button class="chip" data-size="L" data-active="true"><span class="dot"></span>L — duże</button>
+    <button class="reset-link" id="resetBtn">Pokaż wszystkie</button>
+  </div>
+
+  <div class="cards" id="cardsRow"></div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">Czas realizacji w czasie</span>
+      <span class="panel-note" id="visiblePointsNote"></span>
+    </div>
+    <div class="chart-area">
+      <canvas id="scatterChart"></canvas>
+    </div>
+    <div class="legend-row">
+      <span class="legend-item"><span class="legend-swatch s"></span>S — małe</span>
+      <span class="legend-item"><span class="legend-swatch m"></span>M — średnie</span>
+      <span class="legend-item"><span class="legend-swatch l"></span>L — duże</span>
+      <span class="legend-item"><span class="legend-swatch ref"></span>P50 / P85 / P95 (dla aktywnego filtru)</span>
+    </div>
+  </div>
+
+  <p class="footnote">
+    Percentyle liczone metodą interpolacji liniowej (zgodną z funkcją PERCENTILE.INC / numpy „linear”). Karty S, M, L pokazują wartości stałe dla każdego rozmiaru niezależnie od filtra; karta „Łącznie” oraz linie referencyjne na wykresie przeliczają się dla aktualnie zaznaczonych rozmiarów. Dane: Lead_Times_202425.xlsx, n = 36.
+  </p>
+
+</div>
+
+<script>
+const RAW_DATA = [{"date": "2024-07-15", "size": "S", "leadTime": 49}, {"date": "2024-08-22", "size": "S", "leadTime": 48}, {"date": "2024-09-10", "size": "S", "leadTime": 87}, {"date": "2024-09-25", "size": "M", "leadTime": 57}, {"date": "2024-10-05", "size": "M", "leadTime": 148}, {"date": "2024-10-14", "size": "S", "leadTime": 53}, {"date": "2024-10-28", "size": "S", "leadTime": 45}, {"date": "2024-11-18", "size": "M", "leadTime": 145}, {"date": "2024-12-04", "size": "L", "leadTime": 105}, {"date": "2025-01-08", "size": "S", "leadTime": 5}, {"date": "2025-01-20", "size": "L", "leadTime": 163}, {"date": "2025-02-14", "size": "S", "leadTime": 43}, {"date": "2025-02-26", "size": "M", "leadTime": 415}, {"date": "2025-03-15", "size": "L", "leadTime": 123}, {"date": "2025-04-10", "size": "M", "leadTime": 103}, {"date": "2025-05-05", "size": "L", "leadTime": 104}, {"date": "2025-06-12", "size": "L", "leadTime": 302}, {"date": "2025-06-25", "size": "L", "leadTime": 158}, {"date": "2025-07-02", "size": "L", "leadTime": 98}, {"date": "2025-07-11", "size": "S", "leadTime": 52}, {"date": "2025-07-18", "size": "M", "leadTime": 95}, {"date": "2025-07-29", "size": "S", "leadTime": 70}, {"date": "2025-08-03", "size": "M", "leadTime": 95}, {"date": "2025-08-14", "size": "M", "leadTime": 101}, {"date": "2025-08-21", "size": "M", "leadTime": 57}, {"date": "2025-08-29", "size": "M", "leadTime": 57}, {"date": "2025-09-08", "size": "S", "leadTime": 53}, {"date": "2025-09-22", "size": "L", "leadTime": 137}, {"date": "2025-10-04", "size": "S", "leadTime": 73}, {"date": "2025-10-12", "size": "M", "leadTime": 60}, {"date": "2025-10-19", "size": "S", "leadTime": 126}, {"date": "2025-10-27", "size": "M", "leadTime": 57}, {"date": "2025-11-05", "size": "L", "leadTime": 124}, {"date": "2025-11-15", "size": "M", "leadTime": 75}, {"date": "2025-11-25", "size": "M", "leadTime": 89}, {"date": "2025-12-10", "size": "S", "leadTime": 44}];
+
+const SIZE_META = {
+  S: { label: 'S — małe',   color: '#1B9C85' },
+  M: { label: 'M — średnie', color: '#DD8A1F' },
+  L: { label: 'L — duże',   color: '#6457C6' }
+};
+const SIZE_ORDER = ['S','M','L'];
+const PCTS = [50, 85, 95];
+
+const data = RAW_DATA.map(d => ({ ...d, ts: Date.parse(d.date + 'T00:00:00Z') })).sort((a,b)=>a.ts-b.ts);
+
+let activeSizes = new Set(SIZE_ORDER);
+
+function percentile(values, p){
+  if(!values.length) return null;
+  const sorted = [...values].sort((a,b)=>a-b);
+  const idx = (p/100) * (sorted.length - 1);
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  if(lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi]-sorted[lo]) * (idx-lo);
+}
+
+function statsFor(rows){
+  const vals = rows.map(r=>r.leadTime);
+  if(!vals.length) return null;
+  const out = { n: vals.length };
+  PCTS.forEach(p => out['p'+p] = percentile(vals, p));
+  return out;
+}
+
+const MONTHS_SHORT = ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+function fmtShort(ts){
+  const d = new Date(ts);
+  return d.getUTCDate() + ' ' + MONTHS_SHORT[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+}
+function fmtAxis(ts){
+  const d = new Date(ts);
+  return MONTHS_SHORT[d.getUTCMonth()] + ' ' + (''+d.getUTCFullYear()).slice(2);
+}
+
+// ---------- Cards ----------
+const cardsRow = document.getElementById('cardsRow');
+
+function fmtVal(v){ return v === null || v === undefined ? '—' : (Math.round(v*10)/10).toString().replace('.0',''); }
+
+function renderCards(){
+  cardsRow.innerHTML = '';
+
+  SIZE_ORDER.forEach(size => {
+    const rows = data.filter(d => d.size === size);
+    const st = statsFor(rows);
+    const card = document.createElement('div');
+    card.className = 'card ' + size.toLowerCase() + (activeSizes.has(size) ? '' : ' inactive');
+    card.innerHTML = `
+      <div class="card-head">
+        <span class="card-name"><span class="dot"></span>${SIZE_META[size].label}</span>
+        <span class="card-n">n = ${st ? st.n : 0}</span>
+      </div>
+      <div class="card-stats">
+        ${PCTS.map(p => `
+          <div class="stat">
+            <div class="stat-label">P${p}</div>
+            <div class="stat-value">${st ? fmtVal(st['p'+p]) : '—'}<span class="unit">dni</span></div>
+          </div>`).join('')}
+      </div>`;
+    cardsRow.appendChild(card);
+  });
+
+  const combinedRows = data.filter(d => activeSizes.has(d.size));
+  const cst = statsFor(combinedRows);
+  const combinedCard = document.createElement('div');
+  combinedCard.className = 'card combined';
+  combinedCard.innerHTML = `
+    <div class="card-head">
+      <span class="card-name"><span class="dot"></span>Łącznie</span>
+      <span class="card-n">n = ${cst ? cst.n : 0}</span>
+    </div>
+    ${cst ? `<div class="card-stats">
+      ${PCTS.map(p => `
+        <div class="stat">
+          <div class="stat-label">P${p}</div>
+          <div class="stat-value">${fmtVal(cst['p'+p])}<span class="unit">dni</span></div>
+        </div>`).join('')}
+    </div>` : `<div class="card-empty">Wybierz co najmniej jeden rozmiar.</div>`}
+  `;
+  cardsRow.appendChild(combinedCard);
+}
+
+// ---------- Chart ----------
+const ctx = document.getElementById('scatterChart').getContext('2d');
+
+function buildDataset(size){
+  const rows = data.filter(d => d.size === size);
+  return {
+    label: SIZE_META[size].label,
+    data: rows.map(r => ({ x: r.ts, y: r.leadTime, size: r.size, date: r.date })),
+    backgroundColor: SIZE_META[size].color,
+    borderColor: '#ffffff',
+    borderWidth: 1,
+    pointRadius: 5.5,
+    pointHoverRadius: 7,
+    hidden: !activeSizes.has(size)
+  };
+}
+
+const allTs = data.map(d => d.ts);
+const tsMin = Math.min(...allTs), tsMax = Math.max(...allTs);
+const tsPad = (tsMax - tsMin) * 0.04;
+
+function refLineAnnotations(){
+  const combinedRows = data.filter(d => activeSizes.has(d.size));
+  const cst = statsFor(combinedRows);
+  if(!cst) return {};
+  const styles = {
+    p50: { dash: [3,3], width: 1.5, opacity: '55' },
+    p85: { dash: [6,4], width: 1.75, opacity: '85' },
+    p95: { dash: [], width: 2, opacity: 'FF' }
+  };
+  const ann = {};
+  PCTS.forEach(p => {
+    const key = 'p'+p;
+    const s = styles[key];
+    ann[key] = {
+      type: 'line',
+      yMin: cst[key], yMax: cst[key],
+      borderColor: '#C44545' + s.opacity,
+      borderWidth: s.width,
+      borderDash: s.dash,
+      label: {
+        display: true,
+        content: 'P'+p+': '+fmtVal(cst[key])+' dni',
+        position: 'start',
+        xAdjust: 6,
+        backgroundColor: '#C44545',
+        color: '#fff',
+        font: { size: 11, weight: '600', family: "'Inter', sans-serif" },
+        padding: { top:3, bottom:3, left:6, right:6 },
+        borderRadius: 4
+      }
+    };
+  });
+  return ann;
+}
+
+const chart = new Chart(ctx, {
+  type: 'scatter',
+  data: { datasets: SIZE_ORDER.map(buildDataset) },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'nearest', intersect: true },
+    scales: {
+      x: {
+        type: 'linear',
+        min: tsMin - tsPad,
+        max: tsMax + tsPad,
+        grid: { color: '#EEF1F4' },
+        ticks: {
+          color: '#5C6B7A',
+          font: { size: 11.5, family: "'Inter', sans-serif" },
+          maxTicksLimit: 8,
+          callback: v => fmtAxis(v)
+        }
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: '#EEF1F4' },
+        title: {
+          display: true,
+          text: 'Czas realizacji (dni)',
+          color: '#5C6B7A',
+          font: { size: 12, weight: '600', family: "'Inter', sans-serif" }
+        },
+        ticks: { color: '#5C6B7A', font: { size: 11.5, family: "'Inter', sans-serif" } }
+      }
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#16212E',
+        titleFont: { size: 12.5, family: "'Inter', sans-serif", weight: '600' },
+        bodyFont: { size: 12.5, family: "'Inter', sans-serif" },
+        padding: 10,
+        cornerRadius: 7,
+        displayColors: false,
+        callbacks: {
+          title: items => fmtShort(items[0].raw.x),
+          label: item => {
+            const r = item.raw;
+            return 'Rozmiar ' + r.size + ' · ' + r.y + ' dni';
+          }
+        }
+      },
+      annotation: { annotations: refLineAnnotations() }
+    }
+  }
+});
+
+function updateVisibleNote(){
+  const n = data.filter(d => activeSizes.has(d.size)).length;
+  document.getElementById('visiblePointsNote').textContent = 'Widoczne: ' + n + ' z ' + data.length + ' zadań';
+}
+
+function refresh(){
+  SIZE_ORDER.forEach((size, i) => { chart.data.datasets[i].hidden = !activeSizes.has(size); });
+  chart.options.plugins.annotation.annotations = refLineAnnotations();
+  chart.update();
+  renderCards();
+  updateVisibleNote();
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.setAttribute('data-active', activeSizes.has(chip.dataset.size));
+  });
+}
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const size = chip.dataset.size;
+    if(activeSizes.has(size)){
+      if(activeSizes.size === 1) return; // co najmniej jeden rozmiar musi być aktywny
+      activeSizes.delete(size);
+    } else {
+      activeSizes.add(size);
+    }
+    refresh();
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  activeSizes = new Set(SIZE_ORDER);
+  refresh();
+});
+
+renderCards();
+updateVisibleNote();
+</script>
+</body>
+</html>
