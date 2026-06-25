@@ -77,14 +77,57 @@
 
   .footnote{ font-size:12px; color:var(--ink-faint); line-height:1.6; }
 
+  /* ---------- Tabs ---------- */
+  .tabnav{ display:flex; gap:6px; margin-bottom:20px; border-bottom:1.5px solid var(--panel-border); }
+  .tabnav button{
+    appearance:none; border:none; background:transparent; cursor:pointer;
+    font-family:var(--font-body); font-size:13.5px; font-weight:600; color:var(--ink-faint);
+    padding:10px 16px; border-bottom:2.5px solid transparent; margin-bottom:-1.5px; transition:all .15s ease;
+  }
+  .tabnav button:hover{ color:var(--ink-soft); }
+  .tabnav button[data-active="true"]{ color:var(--ink); border-bottom-color:var(--ink); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  /* ---------- Epics table ---------- */
+  table.epics-table{ width:100%; border-collapse:collapse; margin-top:14px; font-size:13px; }
+  table.epics-table th, table.epics-table td{ padding:9px 12px; border-bottom:1px solid var(--panel-border); text-align:left; }
+  table.epics-table th{ font-size:11px; letter-spacing:.03em; text-transform:uppercase; color:var(--ink-faint); font-weight:600; }
+  table.epics-table td.num, table.epics-table th.num{ text-align:right; }
+  table.epics-table tr.known td.epic-name::after{ content:' (znany)'; font-size:10.5px; color:var(--c-base); font-weight:500; }
+  table.epics-table td.status{ font-weight:600; text-align:center; }
+  table.epics-table .epic-swatch{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:7px; }
+
+  /* ---------- KPI hero ---------- */
+  .kpi-hero{ display:flex; gap:18px; align-items:stretch; flex-wrap:wrap; margin-top:14px; }
+  .kpi-main{ flex:1 1 240px; border-radius:var(--radius-md); padding:18px 20px; color:#fff; display:flex; flex-direction:column; justify-content:center; }
+  .kpi-main.risk-high{ background:var(--c-combo); }
+  .kpi-main.risk-mid{ background:var(--c-scope); }
+  .kpi-main.risk-low{ background:#2E8B57; }
+  .kpi-main .kpi-label{ font-size:11.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; opacity:.85; margin-bottom:6px; }
+  .kpi-main .kpi-value{ font-family:var(--font-display); font-size:38px; font-weight:700; line-height:1; }
+  .kpi-main .kpi-sub{ font-size:12.5px; opacity:.9; margin-top:6px; }
+  .kpi-side{ flex:1 1 160px; border:1px solid var(--panel-border); border-radius:var(--radius-md); padding:14px 16px; display:flex; flex-direction:column; justify-content:center; gap:4px; }
+  .kpi-side .kpi-label{ font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-faint); font-weight:600; }
+  .kpi-side .kpi-value{ font-family:var(--font-display); font-size:19px; font-weight:600; color:var(--ink); }
+
+  .assumptions-list{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .assumptions-list .a-item{ display:flex; gap:10px; font-size:13px; color:var(--ink-soft); line-height:1.5; }
+  .assumptions-list .a-item b{ color:var(--ink); flex:none; min-width:150px; }
+
   @media (max-width:860px){
     .input-grid{ grid-template-columns:repeat(2,1fr); }
     .scenario-grid{ grid-template-columns:1fr; }
+    .kpi-hero{ flex-direction:column; }
   }
   @media (max-width:600px){
     .input-grid{ grid-template-columns:1fr 1fr; }
     .chart-area{ height:300px; }
     h1{ font-size:22px; }
+    table.epics-table{ font-size:12px; }
+    table.epics-table th, table.epics-table td{ padding:7px 6px; }
+    .assumptions-list .a-item{ flex-direction:column; gap:2px; }
+    .assumptions-list .a-item b{ min-width:0; }
   }
 </style>
 </head>
@@ -93,6 +136,14 @@
 
   <p class="eyebrow">Symulacja Monte Carlo · prognoza realizacji backlogu</p>
   <h1>Kiedy skończymy i ile dostarczymy</h1>
+
+  <div class="tabnav" id="tabNav">
+    <button data-tab="overview" data-active="true">Backlog ogólny</button>
+    <button data-tab="epics" data-active="false">Epiki — diagnoza</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-overview">
+
   <p class="subtitle">Prognoza dla <b>62 elementów backlogu</b> na bazie historycznego tempa dostarczania z 11 sprintów (2‑tygodniowych). Symulacja losuje 10 000 razy historyczne tempo i zlicza, ile sprintów potrzeba do zamknięcia backlogu oraz ile elementów powstanie w pierwszych 8 tygodniach (do końca sierpnia 2026). Cztery scenariusze pokazują wpływ wzrostu zakresu i zmian pojemności zespołu — każdy oznaczony osobno, plus wariant łączny.</p>
 
   <div class="panel">
@@ -147,6 +198,56 @@
   <p class="footnote">
     Metodologia: symulacja Monte Carlo (bootstrap) — w każdej z 10 000 iteracji losowane jest, ze zwracaniem, historyczne tempo dla każdego kolejnego sprintu (2 tyg.), aż suma osiągnie wielkość backlogu; zliczana jest liczba potrzebnych sprintów oraz liczba elementów gotowych po 4 sprintach (8 tyg., do 31.08.2026). Wzrost zakresu: 62 × 1,3 = 80,6 → zaokrąglone w górę do <b>81 elementów</b>. Zmiana pojemności: sprinty zaczynające się przed 1.09.2026 (lipiec–sierpień, urlopy) liczone z czynnikiem <b>0,5×</b> tempa, sprinty od 1.09.2026 (naprawy wypuszczonych produktów) z czynnikiem <b>0,75×</b> — czynnik mnoży losowo wybraną historyczną wartość tempa dla danego sprintu i jest stosowany trwale od września (nie tylko w samym wrześniu). Data zakończenia = data startu + liczba sprintów × 14 dni. Wszystkie cztery scenariusze korzystają z tego samego rozkładu historycznego tempa (11 sprintów: 5,4,4,5,6,4,2,3,2,5,6), różnią się tylko wielkością backlogu i/lub czynnikiem pojemności.
   </p>
+
+  </div><!-- /tab-overview -->
+
+  <div class="tab-panel" id="tab-epics">
+
+  <p class="subtitle">Diagnoza realizacji <b>6 epików</b> (dużych paczek wartości) z estymacją min–max liczby historyjek każdego, względem docelowej daty <b>31 października 2026</b>. Zespół poświęca na te zadania <b>75% czasu</b>; epiki 1–2 są już znane (pełne tempo od startu), epiki 3–6 są nowe — zakładamy stopniowy wzrost tempa wraz z uczeniem się, oraz podwyższony (+30%) wskaźnik przepustowości we wrześniu.</p>
+
+  <div class="panel">
+    <div class="panel-title">Estymacje epików (wejście)</div>
+    <p class="panel-desc">Liczba historyjek w każdym epiku losowana w symulacji jednostajnie z zakresu min–max. Historyczne tempo zespołu (2‑tyg. sprinty): 3, 4, 5, 4, 2, 7, 4, 5.</p>
+    <table class="epics-table" id="epicsInputTable"></table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Diagnoza — czy zdążymy do 31 października 2026?</div>
+    <p class="panel-desc">Prawdopodobieństwo zakończenia <b>wszystkich</b> 6 epików do daty docelowej, na bazie 10 000 symulacji.</p>
+    <div class="kpi-hero" id="epicsKpiHero"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Mapa drogi — kiedy skończy się każdy epik</div>
+    <p class="panel-desc">Epiki realizowane sekwencyjnie (1→6). Pasek pokazuje okno od mediany startu do mediany końca; ◇ oznacza koniec na poziomie P85 (bezpieczniejsza data).</p>
+    <div class="chart-area" id="roadmapArea"><canvas id="roadmapChart"></canvas></div>
+    <table class="epics-table" id="roadmapTable" style="margin-top:18px;"></table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Prawdopodobieństwo zakończenia wszystkich epików w czasie</div>
+    <p class="panel-desc">% symulacji, w których wszystkie 6 epików są gotowe do danej daty. Pionowa linia = cel 31.10.2026.</p>
+    <div class="chart-area"><canvas id="epicsCdfChart"></canvas></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Założenia modelu</div>
+    <div class="assumptions-list">
+      <div class="a-item"><b>Kolejność epików</b> Sekwencyjnie 1 → 2 → 3 → 4 → 5 → 6, bez równoległej pracy.</div>
+      <div class="a-item"><b>Alokacja zespołu</b> 75% czasu zespołu na te epiki — stałe tempo × 0,75 w każdym sprincie.</div>
+      <div class="a-item"><b>Epiki 1–2 („znane”)</b> Pełne tempo od startu (mnożnik uczenia = 100%).</div>
+      <div class="a-item"><b>Krzywa uczenia (epiki 3–6)</b> Epik 3: 70% tempa → Epik 4: 80% → Epik 5: 90% → Epik 6: 100% (liniowy wzrost wraz z poznawaniem zakresu).</div>
+      <div class="a-item"><b>Wrzesień</b> +30% do tempa w każdym sprincie zaczynającym się we wrześniu (dowolnego roku, gdyby symulacja sięgała dłużej).</div>
+      <div class="a-item"><b>Start symulacji</b> 1 lipca 2026, sprint = 14 dni, data końca = start + liczba sprintów × 14 dni.</div>
+      <div class="a-item"><b>Rozmiar epików</b> Losowany jednostajnie (uniform) z podanego zakresu min–max dla każdej z 10 000 iteracji.</div>
+    </div>
+  </div>
+
+  <p class="footnote">
+    Metodologia: jak w zakładce „Backlog ogólny” (bootstrap z historycznego tempa, 10 000 iteracji), rozszerzona o: (1) losowy rozmiar każdego epiku z zakresu min–max, (2) mnożnik uczenia zależny od epiku, (3) mnożnik +30% dla sprintów startujących we wrześniu, (4) stały mnożnik alokacji 0,75. Wszystkie mnożniki w danym sprincie są multiplikatywne (tempo × alokacja × uczenie × wrzesień), wynik zaokrąglany do najbliższej liczby całkowitej. Dane wejściowe: tabela estymacji epików (załączony obraz) oraz historyczne tempo 3,4,5,4,2,7,4,5.
+  </p>
+
+  </div><!-- /tab-epics -->
 
 </div>
 
@@ -334,6 +435,226 @@ const howManyChart = new Chart(hmCtx, {
       legend: { position:'top', align:'end', labels:{ boxWidth:12, font:{ size:12, family:"'Inter', sans-serif" }, color:'#5C6B7A' } },
       tooltip: { backgroundColor:'#16212E', padding:10, cornerRadius:7,
         titleFont:{ size:12.5, family:"'Inter', sans-serif", weight:'600' }, bodyFont:{ size:12, family:"'Inter', sans-serif" } }
+    }
+  }
+});
+</script>
+
+<script>
+// =====================================================================
+// TAB NAVIGATION
+// =====================================================================
+document.querySelectorAll('#tabNav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#tabNav button').forEach(b => b.setAttribute('data-active', b===btn));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-'+btn.dataset.tab));
+  });
+});
+
+// =====================================================================
+// TAB 2 — EPICS DIAGNOSIS SIMULATION
+// =====================================================================
+const EPIC_HIST = [3,4,5,4,2,7,4,5];
+const EPICS_INPUT = [
+  { name:'Epik 1', min:4, max:6, known:true  },
+  { name:'Epik 2', min:3, max:5, known:true  },
+  { name:'Epik 3', min:3, max:4, known:false },
+  { name:'Epik 4', min:3, max:5, known:false },
+  { name:'Epik 5', min:4, max:7, known:false },
+  { name:'Epik 6', min:4, max:8, known:false }
+];
+const EPIC_LEARN  = [1.0, 1.0, 0.70, 0.80, 0.90, 1.00];
+const EPIC_ALLOC  = 0.75;
+const EPIC_SEPT_BOOST = 1.30;
+const EPIC_TARGET = new Date('2026-10-31T00:00:00Z');
+const EPIC_ITER = 10000;
+const MAX_SPRINTS_EPIC = 500;
+const EPIC_COLORS = ['#1C7C97','#3D9DB8','#DD8A1F','#E6A94F','#6457C6','#8E82E5'];
+
+function epicSprintMultiplier(sprintIdx, epicIndex){
+  const start = new Date(START.getTime() + (sprintIdx-1)*SPRINT_DAYS*DAY_MS);
+  const boost = start.getUTCMonth() === 8 ? EPIC_SEPT_BOOST : 1.0; // miesiąc 8 (0-indeksowany) = wrzesień
+  return EPIC_ALLOC * EPIC_LEARN[epicIndex] * boost;
+}
+
+function simulateEpics(){
+  const totalSprints = new Array(EPIC_ITER);
+  const startSprintPerEpic  = EPICS_INPUT.map(()=> new Array(EPIC_ITER));
+  const finishSprintPerEpic = EPICS_INPUT.map(()=> new Array(EPIC_ITER));
+  for(let it=0; it<EPIC_ITER; it++){
+    let sprint = 0;
+    EPICS_INPUT.forEach((ep, ei) => {
+      startSprintPerEpic[ei][it] = sprint;
+      const size = ep.min + Math.floor(Math.random()*(ep.max-ep.min+1));
+      let done = 0;
+      while(done < size && sprint < MAX_SPRINTS_EPIC){
+        sprint++;
+        const base = EPIC_HIST[Math.floor(Math.random()*EPIC_HIST.length)];
+        done += Math.max(0, Math.round(base*epicSprintMultiplier(sprint, ei)));
+      }
+      finishSprintPerEpic[ei][it] = sprint;
+    });
+    totalSprints[it] = sprint;
+  }
+  return { totalSprints, startSprintPerEpic, finishSprintPerEpic };
+}
+
+const epicSim = simulateEpics();
+const totalP50 = percentile(epicSim.totalSprints,50);
+const totalP85 = percentile(epicSim.totalSprints,85);
+const totalP95 = percentile(epicSim.totalSprints,95);
+const probByTarget = epicSim.totalSprints.filter(s => dateAfterSprints(s) <= EPIC_TARGET).length / EPIC_ITER * 100;
+
+// ---------- Input table ----------
+(function(){
+  let html = '<thead><tr><th>Epik</th><th class="num">Min (historyjek)</th><th class="num">Max (historyjek)</th></tr></thead><tbody>';
+  EPICS_INPUT.forEach((ep,i) => {
+    html += `<tr class="${ep.known?'known':''}"><td class="epic-name"><span class="epic-swatch" style="background:${EPIC_COLORS[i]}"></span>${ep.name}</td><td class="num">${ep.min}</td><td class="num">${ep.max}</td></tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('epicsInputTable').innerHTML = html;
+})();
+
+// ---------- KPI hero ----------
+(function(){
+  const riskClass = probByTarget>=70 ? 'risk-low' : (probByTarget>=30 ? 'risk-mid' : 'risk-high');
+  document.getElementById('epicsKpiHero').innerHTML = `
+    <div class="kpi-main ${riskClass}">
+      <div class="kpi-label">Szansa zakończenia do 31.10.2026</div>
+      <div class="kpi-value">${probByTarget.toFixed(1)}%</div>
+      <div class="kpi-sub">na bazie 10 000 symulacji</div>
+    </div>
+    <div class="kpi-side"><div class="kpi-label">Mediana zakończenia</div><div class="kpi-value">${fmtDate(dateAfterSprints(totalP50))}</div></div>
+    <div class="kpi-side"><div class="kpi-label">Koniec — P85</div><div class="kpi-value">${fmtDate(dateAfterSprints(totalP85))}</div></div>
+    <div class="kpi-side"><div class="kpi-label">Koniec — P95</div><div class="kpi-value">${fmtDate(dateAfterSprints(totalP95))}</div></div>
+  `;
+})();
+
+// ---------- Per-epic roadmap stats ----------
+const epicStats = EPICS_INPUT.map((ep,i) => ({
+  ...ep,
+  color: EPIC_COLORS[i],
+  startP50: percentile(epicSim.startSprintPerEpic[i],50),
+  finishP50: percentile(epicSim.finishSprintPerEpic[i],50),
+  finishP85: percentile(epicSim.finishSprintPerEpic[i],85)
+}));
+
+// ---------- Roadmap floating-bar chart ----------
+const roadmapCtx = document.getElementById('roadmapChart').getContext('2d');
+document.getElementById('roadmapArea').style.height = (60 + epicStats.length*48) + 'px';
+const roadmapChart = new Chart(roadmapCtx, {
+  type: 'bar',
+  data: {
+    labels: epicStats.map(e => e.name),
+    datasets: [
+      {
+        label: 'Okno realizacji (P50 start–koniec)',
+        data: epicStats.map(e => [e.startP50, e.finishP50]),
+        backgroundColor: epicStats.map(e => e.color),
+        borderRadius: 5,
+        barThickness: 22
+      },
+      {
+        type: 'line', showLine:false,
+        label: 'Koniec — P85',
+        data: epicStats.map(e => ({ x: e.finishP85, y: e.name })),
+        pointStyle: 'rectRot', pointRadius: 7, pointBackgroundColor:'#C44545', pointBorderColor:'#C44545'
+      }
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      x: { min:0, grid:{ color:'#EEF1F4' },
+        ticks: { color:'#5C6B7A', font:{ size:11, family:"'Inter', sans-serif" },
+          callback: v => fmtAxis(dateAfterSprints(v)) } },
+      y: { grid:{ display:false }, ticks:{ color:'#16212E', font:{ size:12.5, weight:'600', family:"'Inter', sans-serif" } } }
+    },
+    plugins: {
+      legend: { position:'top', align:'end', labels:{ boxWidth:12, font:{ size:11.5, family:"'Inter', sans-serif" }, color:'#5C6B7A' } },
+      tooltip: {
+        backgroundColor:'#16212E', padding:10, cornerRadius:7,
+        titleFont:{ size:12.5, family:"'Inter', sans-serif", weight:'600' }, bodyFont:{ size:12, family:"'Inter', sans-serif" },
+        callbacks: {
+          label: item => {
+            if(item.dataset.type === 'line'){
+              return 'P85 koniec: ' + fmtDate(dateAfterSprints(item.raw.x));
+            }
+            const e = epicStats[item.dataIndex];
+            return ['Start (P50): ' + fmtDate(dateAfterSprints(e.startP50)), 'Koniec (P50): ' + fmtDate(dateAfterSprints(e.finishP50))];
+          }
+        }
+      }
+    }
+  }
+});
+
+// ---------- Roadmap table ----------
+(function(){
+  let html = '<thead><tr><th>Epik</th><th class="num">Rozmiar</th><th>Start (P50)</th><th>Koniec (P50)</th><th>Koniec (P85)</th><th class="status">Status</th></tr></thead><tbody>';
+  epicStats.forEach(e => {
+    const okP85 = dateAfterSprints(e.finishP85) <= EPIC_TARGET;
+    const okP50 = dateAfterSprints(e.finishP50) <= EPIC_TARGET;
+    const status = okP85 ? '✅' : (okP50 ? '⚠️' : '❌');
+    html += `<tr><td class="epic-name"><span class="epic-swatch" style="background:${e.color}"></span>${e.name}</td>
+      <td class="num">${e.min}–${e.max}</td>
+      <td>${fmtDate(dateAfterSprints(e.startP50))}</td>
+      <td>${fmtDate(dateAfterSprints(e.finishP50))}</td>
+      <td>${fmtDate(dateAfterSprints(e.finishP85))}</td>
+      <td class="status">${status}</td></tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('roadmapTable').innerHTML = html;
+})();
+
+// ---------- Epics CDF chart ----------
+const targetSprintIdx = Math.round((EPIC_TARGET.getTime()-START.getTime())/(SPRINT_DAYS*DAY_MS));
+const epicMaxSprintAxis = Math.max(Math.ceil(percentile(epicSim.totalSprints,99)), targetSprintIdx) + 2;
+const epicCdfLabels = [];
+for(let k=0;k<=epicMaxSprintAxis;k++) epicCdfLabels.push(fmtAxis(dateAfterSprints(k)));
+
+function buildEpicCdf(arr){
+  const counts = new Array(epicMaxSprintAxis+1).fill(0);
+  arr.forEach(s => { if(s<=epicMaxSprintAxis) counts[s]++; else counts[epicMaxSprintAxis]++; });
+  const cdf = []; let running = 0;
+  for(let k=0;k<=epicMaxSprintAxis;k++){ running += counts[k]; cdf.push(running/arr.length*100); }
+  return cdf;
+}
+
+const epicsCdfCtx = document.getElementById('epicsCdfChart').getContext('2d');
+const epicsCdfChart = new Chart(epicsCdfCtx, {
+  type: 'line',
+  data: {
+    labels: epicCdfLabels,
+    datasets: [{
+      label: 'Wszystkie 6 epików',
+      data: buildEpicCdf(epicSim.totalSprints),
+      borderColor: '#C44545', backgroundColor: '#C44545',
+      pointRadius: 0, pointHoverRadius: 4, borderWidth: 2.5, tension: 0.15, fill:false
+    }]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction: { mode:'index', intersect:false },
+    scales: {
+      x: { grid:{ color:'#EEF1F4' }, ticks:{ color:'#5C6B7A', font:{ size:11, family:"'Inter', sans-serif" }, maxTicksLimit:12 } },
+      y: { min:0, max:100, grid:{ color:'#EEF1F4' },
+        title:{ display:true, text:'% symulacji zakończonych', color:'#5C6B7A', font:{ size:12, weight:'600', family:"'Inter', sans-serif" } },
+        ticks:{ color:'#5C6B7A', font:{ size:11, family:"'Inter', sans-serif" }, callback:v=>v+'%' } }
+    },
+    plugins: {
+      legend:{ display:false },
+      tooltip: { backgroundColor:'#16212E', padding:10, cornerRadius:7,
+        titleFont:{ size:12.5, family:"'Inter', sans-serif", weight:'600' }, bodyFont:{ size:12, family:"'Inter', sans-serif" } },
+      annotation: {
+        annotations: {
+          target: { type:'line', xMin: epicCdfLabels[targetSprintIdx], xMax: epicCdfLabels[targetSprintIdx],
+            borderColor:'#16212E', borderWidth:2, borderDash:[6,4],
+            label:{ display:true, content:'Cel: 31.10.2026', position:'end', backgroundColor:'#16212E', color:'#fff',
+              font:{size:10.5,weight:'600',family:"'Inter', sans-serif"}, padding:{top:3,bottom:3,left:6,right:6}, borderRadius:4 } }
+        }
+      }
     }
   }
 });
