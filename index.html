@@ -24,8 +24,6 @@
     --m-color-soft: #FBEEDB;
     --l-color: #6457C6;
     --l-color-soft: #ECE9FA;
-    --combined-color: #16212E;
-    --combined-soft: #EDEFF2;
 
     --ref-line: #C44545;
 
@@ -55,65 +53,33 @@
 
   /* ---------- Header ---------- */
   .eyebrow{
-    font-family: var(--font-body);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin: 0 0 8px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 0 0 8px;
   }
   h1{
-    font-family: var(--font-display);
-    font-size: 28px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    margin: 0 0 6px;
-    color: var(--ink);
+    font-family: var(--font-display); font-size: 28px; font-weight: 600; letter-spacing: -0.01em;
+    margin: 0 0 6px; color: var(--ink);
   }
-  .subtitle{
-    font-size: 14px;
-    color: var(--ink-soft);
-    margin: 0 0 24px;
-  }
+  .subtitle{ font-size: 14px; color: var(--ink-soft); margin: 0 0 22px; }
   .subtitle b{ color: var(--ink); font-weight: 600; }
 
-  /* ---------- Filter chips ---------- */
-  .filter-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom: 22px;
-    flex-wrap: wrap;
-  }
-  .filter-label{
-    font-size: 13px;
-    color: var(--ink-soft);
-    font-weight: 500;
-    margin-right: 4px;
-  }
-  .chip{
-    appearance: none;
-    border: 1.5px solid var(--panel-border);
+  /* ---------- Filters card ---------- */
+  .filters-card{
     background: var(--panel);
-    color: var(--ink-soft);
-    font-family: var(--font-body);
-    font-size: 13.5px;
-    font-weight: 600;
-    padding: 7px 16px;
-    border-radius: 999px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    transition: all 0.15s ease;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    padding: 18px 22px 20px;
+    margin-bottom: 18px;
+  }
+  .filter-row{ display:flex; align-items:center; gap:10px; flex-wrap: wrap; }
+  .filter-label{ font-size: 13px; color: var(--ink-soft); font-weight: 600; margin-right: 2px; min-width: 118px; }
+  .chip{
+    appearance: none; border: 1.5px solid var(--panel-border); background: var(--panel); color: var(--ink-soft);
+    font-family: var(--font-body); font-size: 13.5px; font-weight: 600; padding: 7px 16px; border-radius: 999px;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: all 0.15s ease;
   }
   .chip:hover{ border-color: var(--ink-faint); }
-  .chip .dot{
-    width: 9px; height: 9px; border-radius: 50%;
-    background: var(--ink-faint);
-    transition: background 0.15s ease;
-  }
+  .chip .dot{ width: 9px; height: 9px; border-radius: 50%; background: var(--ink-faint); transition: background 0.15s ease; }
   .chip[data-active="true"][data-size="S"]{ border-color: var(--s-color); background: var(--s-color-soft); color: var(--s-color); }
   .chip[data-active="true"][data-size="S"] .dot{ background: var(--s-color); }
   .chip[data-active="true"][data-size="M"]{ border-color: var(--m-color); background: var(--m-color-soft); color: var(--m-color); }
@@ -122,177 +88,169 @@
   .chip[data-active="true"][data-size="L"] .dot{ background: var(--l-color); }
 
   .reset-link{
-    margin-left: auto;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--ink-soft);
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-decoration: underline;
-    text-decoration-color: var(--panel-border);
-    padding: 4px;
+    margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); background: none; border: none;
+    cursor: pointer; text-decoration: underline; text-decoration-color: var(--panel-border); padding: 4px; white-space: nowrap;
   }
   .reset-link:hover{ color: var(--ink); }
+  .reset-link:disabled{ opacity: 0.4; cursor: default; text-decoration: none; }
+
+  .divider{ height:1px; background: var(--panel-border); margin: 16px 0; }
+
+  .range-head{ display:flex; align-items:baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .range-value{ font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .range-value .sep{ color: var(--ink-faint); font-weight: 500; margin: 0 6px; }
+
+  .slider{ position: relative; height: 30px; margin: 4px 9px 0; }
+  .slider-track{ position:absolute; top:50%; left:0; right:0; height:6px; margin-top:-3px; background:#E1E6EB; border-radius:4px; }
+  .slider-fill{ position:absolute; top:50%; height:6px; margin-top:-3px; background: var(--ink); border-radius:4px; }
+  .slider-handle{
+    position:absolute; top:50%; width:18px; height:18px; margin-top:-9px; margin-left:-9px; border-radius:50%;
+    background:#fff; border:2.5px solid var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.18); cursor:grab; touch-action:none;
+  }
+  .slider-handle:active{ cursor:grabbing; }
+  .slider-handle:focus-visible{ outline:2px solid var(--l-color); outline-offset:3px; }
 
   /* ---------- Stat cards ---------- */
-  .cards{
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 22px;
-  }
-  .card{
-    background: var(--panel);
-    border: 1px solid var(--panel-border);
-    border-radius: var(--radius-md);
-    padding: 16px 16px 14px;
-    transition: opacity 0.2s ease, filter 0.2s ease;
-  }
+  .cards{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+  .card{ background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius-md); padding: 16px 16px 14px; transition: opacity 0.2s ease, filter 0.2s ease; }
   .card.inactive{ opacity: 0.42; filter: saturate(0.4); }
   .card.combined{ background: var(--ink); border-color: var(--ink); }
-  .card-head{
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom: 12px;
-  }
-  .card-name{
-    display:flex; align-items:center; gap:7px;
-    font-family: var(--font-display);
-    font-size: 14.5px;
-    font-weight: 600;
-  }
+  .card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
+  .card-name{ display:flex; align-items:center; gap:7px; font-family: var(--font-display); font-size: 14.5px; font-weight: 600; }
   .card-name .dot{ width:9px; height:9px; border-radius:50%; }
   .card.s .card-name .dot{ background: var(--s-color); }
   .card.m .card-name .dot{ background: var(--m-color); }
   .card.l .card-name .dot{ background: var(--l-color); }
   .card.combined .card-name .dot{ background: #fff; }
   .card.combined .card-name{ color: #fff; }
-  .card-n{
-    font-size: 11.5px;
-    color: var(--ink-faint);
-    font-weight: 500;
-  }
+  .card-n{ font-size: 11.5px; color: var(--ink-faint); font-weight: 500; }
   .card.combined .card-n{ color: #B9C0CA; }
-  .card-stats{
-    display:flex;
-    gap: 10px;
-  }
+  .card-stats{ display:flex; gap: 10px; }
   .stat{ flex:1; text-align:left; }
-  .stat-label{
-    font-size: 10.5px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    font-weight: 600;
-    margin-bottom: 3px;
-  }
+  .stat-label{ font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; margin-bottom: 3px; }
   .card.combined .stat-label{ color: #8E97A3; }
-  .stat-value{
-    font-family: var(--font-display);
-    font-size: 21px;
-    font-weight: 600;
-    color: var(--ink);
-  }
+  .stat-value{ font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--ink); }
   .card.combined .stat-value{ color: #fff; }
-  .stat-value .unit{
-    font-family: var(--font-body);
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--ink-faint);
-    margin-left: 2px;
-  }
+  .stat-value .unit{ font-family: var(--font-body); font-size: 12px; font-weight: 500; color: var(--ink-faint); margin-left: 2px; }
   .card.combined .stat-value .unit{ color: #8E97A3; }
-  .card-empty{
-    font-size: 13px;
-    color: var(--ink-faint);
-    padding: 6px 0 4px;
-  }
+  .card-empty{ font-size: 13px; color: var(--ink-faint); padding: 6px 0 4px; }
 
   /* ---------- Chart panel ---------- */
-  .panel{
-    background: var(--panel);
-    border: 1px solid var(--panel-border);
-    border-radius: var(--radius-lg);
-    padding: 22px 22px 14px;
-    margin-bottom: 18px;
-  }
-  .panel-head{
-    display:flex;
-    align-items:baseline;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .panel-title{
-    font-family: var(--font-display);
-    font-size: 16px;
-    font-weight: 600;
-  }
-  .panel-note{
-    font-size: 12.5px;
-    color: var(--ink-faint);
-  }
-  .chart-area{
-    position: relative;
-    height: 420px;
-    margin-top: 10px;
-  }
+  .panel{ background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius-lg); padding: 22px 22px 14px; margin-bottom: 18px; }
+  .panel-head{ display:flex; align-items:baseline; justify-content: space-between; margin-bottom: 2px; flex-wrap: wrap; gap: 6px; }
+  .panel-title{ font-family: var(--font-display); font-size: 16px; font-weight: 600; }
+  .panel-note{ font-size: 12.5px; color: var(--ink-faint); }
+  .panel-hint{ font-size: 12.5px; color: var(--ink-faint); margin: 2px 0 0; }
+  .chart-area{ position: relative; height: 420px; margin-top: 10px; cursor: pointer; }
 
-  .legend-row{
-    display:flex;
-    flex-wrap: wrap;
-    gap: 18px;
-    align-items:center;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--panel-border);
-  }
-  .legend-item{
-    display:flex; align-items:center; gap:7px;
-    font-size: 12.5px;
-    color: var(--ink-soft);
-  }
+  .legend-row{ display:flex; flex-wrap: wrap; gap: 18px; align-items:center; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--panel-border); }
+  .legend-item{ display:flex; align-items:center; gap:7px; font-size: 12.5px; color: var(--ink-soft); }
   .legend-swatch{ width:10px; height:10px; border-radius:50%; }
   .legend-swatch.s{ background: var(--s-color); }
   .legend-swatch.m{ background: var(--m-color); }
   .legend-swatch.l{ background: var(--l-color); }
-  .legend-swatch.ref{
-    width:16px; height:0; border-top: 2px dashed var(--ref-line); border-radius:0;
+  .legend-swatch.ref{ width:16px; height:0; border-top: 2px dashed var(--ref-line); border-radius:0; }
+  .legend-swatch.added{ width:10px; height:10px; border-radius:2px; background:#fff; border:2px solid var(--ink-soft); transform: rotate(45deg); }
+  .legend-swatch.signal{ width:12px; height:12px; border-radius:50%; background:#fff; border:2.5px solid var(--ref-line); }
+  .legend-item[data-mode]{ display:none; }
+  .legend-item[data-mode].mode-active{ display:flex; }
+
+  .seg-toggle{ display:inline-flex; border:1.5px solid var(--panel-border); border-radius:999px; padding:3px; gap:2px; }
+  .seg-btn{ border:none; background:transparent; padding:6px 14px; border-radius:999px; font-size:12.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; font-family:var(--font-body); }
+  .seg-btn[data-active="true"]{ background:var(--ink); color:#fff; }
+  .chart-controls{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:8px; margin-bottom: 4px; }
+
+  .card-row2{ display:flex; gap:10px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--panel-border); }
+  .card-note{ font-size: 11px; color: var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px dashed var(--panel-border); }
+  .signal-badge{ display:inline-flex; align-items:center; background:var(--ref-line); color:#fff; font-size:10px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:6px; }
+  .card.combined .signal-badge{ display:none; }
+
+  /* ---------- Add task panel ---------- */
+  .add-panel-head{ margin-bottom: 4px; }
+  .add-grid{ display:grid; grid-template-columns: 1fr 1fr 1.3fr auto; gap: 14px; align-items:end; margin-top: 14px; }
+  .field label{ display:block; font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
+  .field input[type="date"]{
+    width:100%; padding: 8px 10px; border: 1.5px solid var(--panel-border); border-radius: 8px;
+    font-family: var(--font-body); font-size: 13.5px; color: var(--ink); background:#fff;
   }
+  .field input[type="date"]:focus{ outline:none; border-color: var(--ink-faint); }
+  .size-pick{ display:flex; gap:6px; }
+  .size-pick .chip{ padding: 8px 14px; }
+  .btn-primary{
+    background: var(--ink); color: #fff; border:none; border-radius: 8px; padding: 9px 20px; font-weight:600;
+    font-size: 13.5px; cursor:pointer; font-family: var(--font-body); white-space: nowrap; height: 38px;
+  }
+  .btn-primary:hover{ background:#27384a; }
+  .form-feedback{ min-height: 18px; margin-top: 10px; font-size: 12.5px; }
+  .form-feedback.error{ color: var(--ref-line); font-weight: 600; }
+  .form-feedback.preview{ color: var(--ink-soft); }
+  .form-feedback.preview b{ color: var(--ink); }
+
+  .edit-summary{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--panel-border); font-size: 12.5px; color: var(--ink-soft); }
+  .edit-summary b{ color: var(--ink); }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop{
+    position: fixed; inset:0; background: rgba(22,33,46,.45); display:flex; align-items:center; justify-content:center;
+    z-index: 50; opacity:0; pointer-events:none; transition: opacity .15s ease;
+  }
+  .modal-backdrop.open{ opacity:1; pointer-events:auto; }
+  .modal-box{ background:#fff; border-radius:14px; padding:22px 24px; max-width:320px; width:90%; box-shadow:0 16px 44px rgba(22,33,46,.28); }
+  .modal-title{ font-family: var(--font-display); font-size:16px; font-weight:600; margin:0 0 6px; }
+  .modal-detail{ font-size:13.5px; color: var(--ink-soft); margin:0 0 18px; }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; }
+  .modal-btn{ border-radius:8px; padding:8px 16px; font-size:13.5px; font-weight:600; border:1.5px solid var(--panel-border); background:#fff; color: var(--ink-soft); cursor:pointer; font-family: var(--font-body); }
+  .modal-btn:hover{ border-color: var(--ink-faint); }
+  .modal-btn.danger{ background: var(--ref-line); border-color: var(--ref-line); color:#fff; }
+  .modal-btn.danger:hover{ filter: brightness(0.95); }
 
   /* ---------- Footer ---------- */
-  .footnote{
-    font-size: 12px;
-    color: var(--ink-faint);
-    line-height: 1.6;
-  }
+  .footnote{ font-size: 12px; color: var(--ink-faint); line-height: 1.6; }
 
   @media (max-width: 860px){
     .cards{ grid-template-columns: repeat(2, 1fr); }
+    .add-grid{ grid-template-columns: 1fr 1fr; }
+    .filter-label{ min-width: auto; width:100%; }
   }
   @media (max-width: 560px){
     .cards{ grid-template-columns: 1fr; }
-    .card-stats{ gap: 6px; }
     h1{ font-size: 23px; }
     .chart-area{ height: 340px; }
     .reset-link{ margin-left: 0; }
+    .add-grid{ grid-template-columns: 1fr; }
+    .btn-primary{ width: 100%; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <p class="eyebrow">Analiza operacyjna · lipiec 2024 – grudzień 2025</p>
+  <p class="eyebrow">Analiza operacyjna · dane od lipca 2024</p>
   <h1>Czasy realizacji zadań</h1>
   <p class="subtitle">Rozrzut czasu realizacji w dniach w czasie, z podziałem na deklarowany rozmiar zadania (<b>S</b> / <b>M</b> / <b>L</b>) oraz percentyle 50 / 85 / 95.</p>
 
-  <div class="filter-row">
-    <span class="filter-label">Filtruj wg rozmiaru:</span>
-    <button class="chip" data-size="S" data-active="true"><span class="dot"></span>S — małe</button>
-    <button class="chip" data-size="M" data-active="true"><span class="dot"></span>M — średnie</button>
-    <button class="chip" data-size="L" data-active="true"><span class="dot"></span>L — duże</button>
-    <button class="reset-link" id="resetBtn">Pokaż wszystkie</button>
+  <div class="filters-card">
+    <div class="filter-row">
+      <span class="filter-label">Rozmiar zadania:</span>
+      <button class="chip" data-size="S" data-active="true"><span class="dot"></span>S — małe</button>
+      <button class="chip" data-size="M" data-active="true"><span class="dot"></span>M — średnie</button>
+      <button class="chip" data-size="L" data-active="true"><span class="dot"></span>L — duże</button>
+      <button class="reset-link" id="resetSizesBtn">Pokaż wszystkie rozmiary</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="range-head">
+      <span class="filter-label" style="margin:0;">Zakres dat:</span>
+      <span class="range-value"><span id="rangeLabelMin"></span><span class="sep">→</span><span id="rangeLabelMax"></span></span>
+      <button class="reset-link" id="resetRangeBtn">Pokaż cały okres</button>
+    </div>
+    <div class="slider" id="dateSlider">
+      <div class="slider-track"></div>
+      <div class="slider-fill" id="sliderFill"></div>
+      <div class="slider-handle" id="handleMin" role="slider" tabindex="0" aria-label="Początek zakresu"></div>
+      <div class="slider-handle" id="handleMax" role="slider" tabindex="0" aria-label="Koniec zakresu"></div>
+    </div>
   </div>
 
   <div class="cards" id="cardsRow"></div>
@@ -302,6 +260,14 @@
       <span class="panel-title">Czas realizacji w czasie</span>
       <span class="panel-note" id="visiblePointsNote"></span>
     </div>
+    <div class="chart-controls">
+      <div class="seg-toggle" id="viewModeToggle">
+        <button class="seg-btn" data-mode="percentile">Percentyle</button>
+        <button class="seg-btn" data-mode="xmr">Zmienność (XmR)</button>
+      </div>
+    </div>
+    <p class="panel-hint">Kliknij punkt na wykresie, aby go usunąć.</p>
+    <p class="panel-hint" id="rulesHint">Sygnały: 1) punkt poza NPL &nbsp;·&nbsp; 2) 2 z 3 kolejnych punktów w zewnętrznej 1/3 strefy (poza 2σ) po tej samej stronie &nbsp;·&nbsp; 3) 3 z 5 kolejnych punktów poza 1σ po tej samej stronie &nbsp;·&nbsp; 4) 8 kolejnych punktów po jednej stronie średniej.</p>
     <div class="chart-area">
       <canvas id="scatterChart"></canvas>
     </div>
@@ -309,30 +275,91 @@
       <span class="legend-item"><span class="legend-swatch s"></span>S — małe</span>
       <span class="legend-item"><span class="legend-swatch m"></span>M — średnie</span>
       <span class="legend-item"><span class="legend-swatch l"></span>L — duże</span>
-      <span class="legend-item"><span class="legend-swatch ref"></span>P50 / P85 / P95 (dla aktywnego filtru)</span>
+      <span class="legend-item"><span class="legend-swatch added"></span>zadanie dodane w tej sesji</span>
+      <span class="legend-item" data-mode="percentile"><span class="legend-swatch ref"></span>P50 / P85 / P95 (dla aktywnego filtru)</span>
+      <span class="legend-item" data-mode="xmr"><span class="legend-swatch signal"></span>punkt z sygnałem (reguła 1–4)</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head add-panel-head">
+      <span class="panel-title">Dodaj nowe zadanie (symulacja)</span>
+    </div>
+    <p class="panel-hint">Podaj datę startu i zakończenia — czas realizacji wyliczy się automatycznie. Zmiany działają tylko w tej sesji; odświeżenie strony przywraca dane wejściowe.</p>
+
+    <div class="add-grid">
+      <div class="field">
+        <label for="newStart">Data startu</label>
+        <input type="date" id="newStart">
+      </div>
+      <div class="field">
+        <label for="newEnd">Data zakończenia</label>
+        <input type="date" id="newEnd">
+      </div>
+      <div class="field">
+        <label>Rozmiar</label>
+        <div class="size-pick" id="newSizePick">
+          <button class="chip" data-newsize="S" type="button"><span class="dot"></span>S</button>
+          <button class="chip" data-newsize="M" type="button"><span class="dot"></span>M</button>
+          <button class="chip" data-newsize="L" type="button"><span class="dot"></span>L</button>
+        </div>
+      </div>
+      <button class="btn-primary" id="addTaskBtn" type="button">Dodaj zadanie</button>
+    </div>
+    <div class="form-feedback" id="formFeedback"></div>
+
+    <div class="edit-summary">
+      <span>W tej sesji: <b id="addedCount">0</b> dodanych · <b id="deletedCount">0</b> usuniętych</span>
+      <button class="reset-link" id="undoDeleteBtn" disabled>Przywróć ostatnio usunięty</button>
+      <button class="reset-link" id="resetAllBtn">Zresetuj wszystkie zmiany</button>
     </div>
   </div>
 
   <p class="footnote">
-    Percentyle liczone metodą interpolacji liniowej (zgodną z funkcją PERCENTILE.INC / numpy „linear”). Karty S, M, L pokazują wartości stałe dla każdego rozmiaru niezależnie od filtra; karta „Łącznie” oraz linie referencyjne na wykresie przeliczają się dla aktualnie zaznaczonych rozmiarów. Dane: Lead_Times_202425.xlsx, n = 36.
+    Percentyle liczone metodą interpolacji liniowej (zgodną z funkcją PERCENTILE.INC / numpy „linear”). UNPL/LNPL (naturalne granice procesu) liczone jako średnia ± 2,66 × średnia ruchoma rozstępu (MR) dla kolejnych chronologicznie zadań tego samego rozmiaru; LNPL nie spada poniżej 0. Karty S, M, L pokazują wartości dla każdego rozmiaru w wybranym zakresie dat, niezależnie od filtra rozmiaru; karta „Łącznie” oraz linie referencyjne na wykresie uwzględniają dodatkowo aktywny filtr rozmiaru. Analiza zmienności (XmR, UNPL/LNPL, reguły sygnałów) liczona jest osobno dla S/M/L — mieszanie rozmiarów w jednej sekwencji zniekształciłoby naturalną zmienność procesu, więc karta „Łącznie” jej nie zawiera. Dane wejściowe: Lead_Times_202425.xlsx, n = 36.
   </p>
 
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-box">
+    <p class="modal-title">Usunąć ten punkt?</p>
+    <p class="modal-detail" id="modalDetail"></p>
+    <div class="modal-actions">
+      <button class="modal-btn" id="modalCancel">Nie</button>
+      <button class="modal-btn danger" id="modalConfirm">Tak, usuń</button>
+    </div>
+  </div>
 </div>
 
 <script>
 const RAW_DATA = [{"date": "2024-07-15", "size": "S", "leadTime": 49}, {"date": "2024-08-22", "size": "S", "leadTime": 48}, {"date": "2024-09-10", "size": "S", "leadTime": 87}, {"date": "2024-09-25", "size": "M", "leadTime": 57}, {"date": "2024-10-05", "size": "M", "leadTime": 148}, {"date": "2024-10-14", "size": "S", "leadTime": 53}, {"date": "2024-10-28", "size": "S", "leadTime": 45}, {"date": "2024-11-18", "size": "M", "leadTime": 145}, {"date": "2024-12-04", "size": "L", "leadTime": 105}, {"date": "2025-01-08", "size": "S", "leadTime": 5}, {"date": "2025-01-20", "size": "L", "leadTime": 163}, {"date": "2025-02-14", "size": "S", "leadTime": 43}, {"date": "2025-02-26", "size": "M", "leadTime": 415}, {"date": "2025-03-15", "size": "L", "leadTime": 123}, {"date": "2025-04-10", "size": "M", "leadTime": 103}, {"date": "2025-05-05", "size": "L", "leadTime": 104}, {"date": "2025-06-12", "size": "L", "leadTime": 302}, {"date": "2025-06-25", "size": "L", "leadTime": 158}, {"date": "2025-07-02", "size": "L", "leadTime": 98}, {"date": "2025-07-11", "size": "S", "leadTime": 52}, {"date": "2025-07-18", "size": "M", "leadTime": 95}, {"date": "2025-07-29", "size": "S", "leadTime": 70}, {"date": "2025-08-03", "size": "M", "leadTime": 95}, {"date": "2025-08-14", "size": "M", "leadTime": 101}, {"date": "2025-08-21", "size": "M", "leadTime": 57}, {"date": "2025-08-29", "size": "M", "leadTime": 57}, {"date": "2025-09-08", "size": "S", "leadTime": 53}, {"date": "2025-09-22", "size": "L", "leadTime": 137}, {"date": "2025-10-04", "size": "S", "leadTime": 73}, {"date": "2025-10-12", "size": "M", "leadTime": 60}, {"date": "2025-10-19", "size": "S", "leadTime": 126}, {"date": "2025-10-27", "size": "M", "leadTime": 57}, {"date": "2025-11-05", "size": "L", "leadTime": 124}, {"date": "2025-11-15", "size": "M", "leadTime": 75}, {"date": "2025-11-25", "size": "M", "leadTime": 89}, {"date": "2025-12-10", "size": "S", "leadTime": 44}];
 
 const SIZE_META = {
-  S: { label: 'S — małe',   color: '#1B9C85' },
+  S: { label: 'S — małe',    color: '#1B9C85' },
   M: { label: 'M — średnie', color: '#DD8A1F' },
-  L: { label: 'L — duże',   color: '#6457C6' }
+  L: { label: 'L — duże',    color: '#6457C6' }
 };
 const SIZE_ORDER = ['S','M','L'];
 const PCTS = [50, 85, 95];
+const DAY_MS = 86400000;
 
-const data = RAW_DATA.map(d => ({ ...d, ts: Date.parse(d.date + 'T00:00:00Z') })).sort((a,b)=>a.ts-b.ts);
+function tsOf(iso){ return Date.parse(iso + 'T00:00:00Z'); }
+function isoOf(ts){ return new Date(ts).toISOString().slice(0,10); }
+
+let nextId = 0;
+let workingData = RAW_DATA.map(d => ({
+  id: nextId++, date: d.date, ts: tsOf(d.date), size: d.size, leadTime: d.leadTime,
+  origin: 'original', start: null
+}));
 
 let activeSizes = new Set(SIZE_ORDER);
+let deletedStack = [];
+let trackMin, trackMax, rangeMin, rangeMax;
+let pendingDeleteId = null;
+let selectedNewSize = null;
+let chartMode = 'xmr'; // 'percentile' | 'xmr'
+let xmrResults = {};   // size -> computeXmR() result, refreshed each refreshData()
 
 function percentile(values, p){
   if(!values.length) return null;
@@ -342,13 +369,77 @@ function percentile(values, p){
   if(lo === hi) return sorted[lo];
   return sorted[lo] + (sorted[hi]-sorted[lo]) * (idx-lo);
 }
-
 function statsFor(rows){
   const vals = rows.map(r=>r.leadTime);
   if(!vals.length) return null;
   const out = { n: vals.length };
   PCTS.forEach(p => out['p'+p] = percentile(vals, p));
+  out.avg = vals.reduce((a,b)=>a+b,0) / vals.length;
   return out;
+}
+
+// Individuals / Moving Range (XmR) control-limit + signal-rule calculation.
+// rows must be pre-filtered to a single, homogeneous size and sorted chronologically.
+function computeXmR(rowsSorted){
+  const n = rowsSorted.length;
+  if(n === 0) return null;
+  const vals = rowsSorted.map(r => r.leadTime);
+  const mean = vals.reduce((a,b)=>a+b,0) / n;
+  const flagsById = new Map();
+  rowsSorted.forEach(r => flagsById.set(r.id, new Set()));
+
+  if(n < 2){
+    return { n, mean, mrBar: null, UNPL: null, LNPL: null, zone: null, flagsById };
+  }
+
+  let mrSum = 0;
+  for(let i=1;i<n;i++) mrSum += Math.abs(vals[i]-vals[i-1]);
+  const mrBar = mrSum / (n-1);
+  const unit = 2.66 * mrBar / 3;
+  const UNPL = mean + 2.66*mrBar;
+  const LNPL = Math.max(0, mean - 2.66*mrBar);
+  const zone = {
+    upper1: mean + unit,            lower1: Math.max(0, mean - unit),
+    upper2: mean + 2*unit,          lower2: Math.max(0, mean - 2*unit)
+  };
+
+  const addFlag = (i, rule) => flagsById.get(rowsSorted[i].id).add(rule);
+
+  // Rule 1 — single point beyond the natural process limits.
+  for(let i=0;i<n;i++){
+    if(vals[i] > UNPL || vals[i] < LNPL) addFlag(i, 1);
+  }
+  // Rule 2 — 2 of 3 consecutive points in the outer third (beyond 2 sigma), same side.
+  for(let i=2;i<n;i++){
+    const w = [i-2,i-1,i];
+    const up = w.filter(j => vals[j] > zone.upper2);
+    const lo = w.filter(j => vals[j] < zone.lower2);
+    if(up.length >= 2) up.forEach(j => addFlag(j, 2));
+    if(lo.length >= 2) lo.forEach(j => addFlag(j, 2));
+  }
+  // Rule 3 — 3 of 5 consecutive points beyond 1 sigma, same side.
+  for(let i=4;i<n;i++){
+    const w = [i-4,i-3,i-2,i-1,i];
+    const up = w.filter(j => vals[j] > zone.upper1);
+    const lo = w.filter(j => vals[j] < zone.lower1);
+    if(up.length >= 3) up.forEach(j => addFlag(j, 3));
+    if(lo.length >= 3) lo.forEach(j => addFlag(j, 3));
+  }
+  // Rule 4 — 8 consecutive points on the same side of the mean.
+  for(let i=7;i<n;i++){
+    const w = [i-7,i-6,i-5,i-4,i-3,i-2,i-1,i];
+    if(w.every(j => vals[j] > mean) || w.every(j => vals[j] < mean)){
+      w.forEach(j => addFlag(j, 4));
+    }
+  }
+  return { n, mean, mrBar, UNPL, LNPL, zone, flagsById };
+}
+function fmtVal(v){ return (v === null || v === undefined) ? '—' : (Math.round(v*10)/10).toString().replace('.0',''); }
+function plSignalWord(n){
+  if(n === 1) return 'sygnał';
+  const m10 = n % 10, m100 = n % 100;
+  if(m10 >= 2 && m10 <= 4 && !(m100 >= 12 && m100 <= 14)) return 'sygnały';
+  return 'sygnałów';
 }
 
 const MONTHS_SHORT = ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
@@ -361,35 +452,64 @@ function fmtAxis(ts){
   return MONTHS_SHORT[d.getUTCMonth()] + ' ' + (''+d.getUTCFullYear()).slice(2);
 }
 
+function inRange(ts){ return ts >= rangeMin && ts <= rangeMax; }
+
+function recomputeTrackBounds(){
+  if(workingData.length === 0){
+    trackMin = Date.now(); trackMax = trackMin; rangeMin = trackMin; rangeMax = trackMax;
+    return;
+  }
+  const tsList = workingData.map(d=>d.ts);
+  const newMin = Math.min(...tsList), newMax = Math.max(...tsList);
+  const firstRun = (trackMin === undefined);
+  trackMin = newMin; trackMax = newMax;
+  if(firstRun || rangeMin === undefined){
+    rangeMin = trackMin; rangeMax = trackMax;
+    return;
+  }
+  rangeMin = Math.min(Math.max(rangeMin, trackMin), trackMax);
+  rangeMax = Math.max(Math.min(rangeMax, trackMax), trackMin);
+  if(rangeMin > rangeMax){ rangeMin = trackMin; rangeMax = trackMax; }
+}
+
 // ---------- Cards ----------
 const cardsRow = document.getElementById('cardsRow');
 
-function fmtVal(v){ return v === null || v === undefined ? '—' : (Math.round(v*10)/10).toString().replace('.0',''); }
-
 function renderCards(){
   cardsRow.innerHTML = '';
+  const ROW1 = [['p50','P50'], ['p85','P85'], ['p95','P95'], ['avg','Średnia']];
 
   SIZE_ORDER.forEach(size => {
-    const rows = data.filter(d => d.size === size);
+    const rows = workingData.filter(d => d.size === size && inRange(d.ts)).sort((a,b)=>a.ts-b.ts);
     const st = statsFor(rows);
+    const xr = xmrResults[size];
+    const signalCount = xr ? Array.from(xr.flagsById.values()).filter(s => s.size > 0).length : 0;
+
     const card = document.createElement('div');
     card.className = 'card ' + size.toLowerCase() + (activeSizes.has(size) ? '' : ' inactive');
     card.innerHTML = `
       <div class="card-head">
         <span class="card-name"><span class="dot"></span>${SIZE_META[size].label}</span>
-        <span class="card-n">n = ${st ? st.n : 0}</span>
+        <span class="card-n">n = ${st ? st.n : 0}${signalCount ? `<span class="signal-badge">${signalCount} ${plSignalWord(signalCount)}</span>` : ''}</span>
       </div>
       <div class="card-stats">
-        ${PCTS.map(p => `
+        ${ROW1.map(([key,label]) => `
           <div class="stat">
-            <div class="stat-label">P${p}</div>
-            <div class="stat-value">${st ? fmtVal(st['p'+p]) : '—'}<span class="unit">dni</span></div>
+            <div class="stat-label">${label}</div>
+            <div class="stat-value">${st ? fmtVal(st[key]) : '—'}<span class="unit">dni</span></div>
+          </div>`).join('')}
+      </div>
+      <div class="card-row2">
+        ${[['UNPL', xr ? xr.UNPL : null], ['LNPL', xr ? xr.LNPL : null]].map(([label,val]) => `
+          <div class="stat">
+            <div class="stat-label">${label}</div>
+            <div class="stat-value">${val === null || val === undefined ? '—' : fmtVal(val)}<span class="unit">dni</span></div>
           </div>`).join('')}
       </div>`;
     cardsRow.appendChild(card);
   });
 
-  const combinedRows = data.filter(d => activeSizes.has(d.size));
+  const combinedRows = workingData.filter(d => activeSizes.has(d.size) && inRange(d.ts));
   const cst = statsFor(combinedRows);
   const combinedCard = document.createElement('div');
   combinedCard.className = 'card combined';
@@ -399,39 +519,157 @@ function renderCards(){
       <span class="card-n">n = ${cst ? cst.n : 0}</span>
     </div>
     ${cst ? `<div class="card-stats">
-      ${PCTS.map(p => `
+      ${ROW1.map(([key,label]) => `
         <div class="stat">
-          <div class="stat-label">P${p}</div>
-          <div class="stat-value">${fmtVal(cst['p'+p])}<span class="unit">dni</span></div>
+          <div class="stat-label">${label}</div>
+          <div class="stat-value">${fmtVal(cst[key])}<span class="unit">dni</span></div>
         </div>`).join('')}
-    </div>` : `<div class="card-empty">Wybierz co najmniej jeden rozmiar.</div>`}
+    </div>
+    <div class="card-note">XmR (UNPL/LNPL) dostępne tylko dla pojedynczych rozmiarów</div>` : `<div class="card-empty">Brak danych w wybranym zakresie / filtrze.</div>`}
   `;
   cardsRow.appendChild(combinedCard);
 }
 
+// ---------- Slider ----------
+const sliderEl = document.getElementById('dateSlider');
+const handleMin = document.getElementById('handleMin');
+const handleMax = document.getElementById('handleMax');
+const sliderFill = document.getElementById('sliderFill');
+const rangeLabelMin = document.getElementById('rangeLabelMin');
+const rangeLabelMax = document.getElementById('rangeLabelMax');
+
+function tsToPct(ts){
+  if(trackMax === trackMin) return 0;
+  return (ts - trackMin) / (trackMax - trackMin) * 100;
+}
+function pctToTs(pct){
+  return trackMin + (pct/100) * (trackMax - trackMin);
+}
+function snapToDay(ts){ return Math.round(ts / DAY_MS) * DAY_MS; }
+
+function renderSlider(){
+  const pMin = tsToPct(rangeMin), pMax = tsToPct(rangeMax);
+  handleMin.style.left = pMin + '%';
+  handleMax.style.left = pMax + '%';
+  sliderFill.style.left = pMin + '%';
+  sliderFill.style.width = (pMax - pMin) + '%';
+  rangeLabelMin.textContent = fmtShort(rangeMin);
+  rangeLabelMax.textContent = fmtShort(rangeMax);
+  handleMin.setAttribute('aria-valuemin', trackMin);
+  handleMin.setAttribute('aria-valuemax', trackMax);
+  handleMin.setAttribute('aria-valuenow', rangeMin);
+  handleMin.setAttribute('aria-valuetext', fmtShort(rangeMin));
+  handleMax.setAttribute('aria-valuemin', trackMin);
+  handleMax.setAttribute('aria-valuemax', trackMax);
+  handleMax.setAttribute('aria-valuenow', rangeMax);
+  handleMax.setAttribute('aria-valuetext', fmtShort(rangeMax));
+  document.getElementById('resetRangeBtn').disabled = (rangeMin === trackMin && rangeMax === trackMax);
+}
+
+function startDrag(which, evt){
+  evt.preventDefault();
+  const handle = which === 'min' ? handleMin : handleMax;
+  handle.setPointerCapture && evt.pointerId !== undefined && handle.setPointerCapture(evt.pointerId);
+
+  function onMove(e){
+    const rect = sliderEl.getBoundingClientRect();
+    const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
+    let pct = (clientX - rect.left) / rect.width * 100;
+    pct = Math.max(0, Math.min(100, pct));
+    let ts = snapToDay(pctToTs(pct));
+    if(which === 'min'){
+      ts = Math.min(ts, rangeMax);
+      ts = Math.max(ts, trackMin);
+      rangeMin = ts;
+    } else {
+      ts = Math.max(ts, rangeMin);
+      ts = Math.min(ts, trackMax);
+      rangeMax = ts;
+    }
+    renderSlider();
+    refreshData();
+  }
+  function onUp(){
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onUp);
+  }
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('touchend', onUp);
+}
+
+handleMin.addEventListener('pointerdown', e => startDrag('min', e));
+handleMax.addEventListener('pointerdown', e => startDrag('max', e));
+handleMin.addEventListener('mousedown', e => startDrag('min', e));
+handleMax.addEventListener('mousedown', e => startDrag('max', e));
+handleMin.addEventListener('touchstart', e => startDrag('min', e), { passive: false });
+handleMax.addEventListener('touchstart', e => startDrag('max', e), { passive: false });
+
+function moveHandleByKey(which, deltaDays){
+  let ts = (which === 'min' ? rangeMin : rangeMax) + deltaDays * DAY_MS;
+  if(which === 'min'){ rangeMin = Math.max(trackMin, Math.min(ts, rangeMax)); }
+  else { rangeMax = Math.min(trackMax, Math.max(ts, rangeMin)); }
+  renderSlider();
+  refreshData();
+}
+handleMin.addEventListener('keydown', e => {
+  if(e.key === 'ArrowLeft'){ moveHandleByKey('min', -1); e.preventDefault(); }
+  if(e.key === 'ArrowRight'){ moveHandleByKey('min', 1); e.preventDefault(); }
+  if(e.key === 'Home'){ rangeMin = trackMin; renderSlider(); refreshData(); }
+});
+handleMax.addEventListener('keydown', e => {
+  if(e.key === 'ArrowLeft'){ moveHandleByKey('max', -1); e.preventDefault(); }
+  if(e.key === 'ArrowRight'){ moveHandleByKey('max', 1); e.preventDefault(); }
+  if(e.key === 'End'){ rangeMax = trackMax; renderSlider(); refreshData(); }
+});
+
+document.getElementById('resetRangeBtn').addEventListener('click', () => {
+  rangeMin = trackMin; rangeMax = trackMax;
+  renderSlider();
+  refreshData();
+});
+
 // ---------- Chart ----------
 const ctx = document.getElementById('scatterChart').getContext('2d');
 
+function recomputeXmRResults(){
+  xmrResults = {};
+  SIZE_ORDER.forEach(size => {
+    const rows = workingData.filter(d => d.size === size && inRange(d.ts)).sort((a,b)=>a.ts-b.ts);
+    xmrResults[size] = computeXmR(rows);
+  });
+}
+
 function buildDataset(size){
-  const rows = data.filter(d => d.size === size);
+  const rows = workingData.filter(d => d.size === size && inRange(d.ts)).sort((a,b)=>a.ts-b.ts);
+  const xr = chartMode === 'xmr' ? xmrResults[size] : null;
+  const flagsOf = r => (xr && xr.flagsById.get(r.id)) || new Set();
+
   return {
     label: SIZE_META[size].label,
-    data: rows.map(r => ({ x: r.ts, y: r.leadTime, size: r.size, date: r.date })),
+    data: rows.map(r => ({
+      x: r.ts, y: r.leadTime, id: r.id, size: r.size, date: r.date, start: r.start, origin: r.origin,
+      flags: Array.from(flagsOf(r))
+    })),
     backgroundColor: SIZE_META[size].color,
-    borderColor: '#ffffff',
-    borderWidth: 1,
-    pointRadius: 5.5,
-    pointHoverRadius: 7,
+    borderColor: rows.map(r => flagsOf(r).size > 0 ? '#C44545' : (r.origin === 'added' ? SIZE_META[size].color : '#ffffff')),
+    borderWidth: rows.map(r => flagsOf(r).size > 0 ? 3 : (r.origin === 'added' ? 2.5 : 1)),
+    pointStyle: rows.map(r => r.origin === 'added' ? 'rectRot' : 'circle'),
+    pointRadius: rows.map(r => flagsOf(r).size > 0 ? (r.origin === 'added' ? 8 : 7.5) : (r.origin === 'added' ? 6.5 : 5.5)),
+    pointHoverRadius: rows.map(r => flagsOf(r).size > 0 ? 9.5 : (r.origin === 'added' ? 8 : 7)),
     hidden: !activeSizes.has(size)
   };
 }
 
-const allTs = data.map(d => d.ts);
-const tsMin = Math.min(...allTs), tsMax = Math.max(...allTs);
-const tsPad = (tsMax - tsMin) * 0.04;
-
-function refLineAnnotations(){
-  const combinedRows = data.filter(d => activeSizes.has(d.size));
+function percentileAnnotations(){
+  const combinedRows = workingData.filter(d => activeSizes.has(d.size) && inRange(d.ts));
   const cst = statsFor(combinedRows);
   if(!cst) return {};
   const styles = {
@@ -441,29 +679,56 @@ function refLineAnnotations(){
   };
   const ann = {};
   PCTS.forEach(p => {
-    const key = 'p'+p;
-    const s = styles[key];
+    const key = 'p'+p; const s = styles[key];
     ann[key] = {
-      type: 'line',
-      yMin: cst[key], yMax: cst[key],
-      borderColor: '#C44545' + s.opacity,
-      borderWidth: s.width,
-      borderDash: s.dash,
+      type: 'line', yMin: cst[key], yMax: cst[key],
+      borderColor: '#C44545' + s.opacity, borderWidth: s.width, borderDash: s.dash,
       label: {
-        display: true,
-        content: 'P'+p+': '+fmtVal(cst[key])+' dni',
-        position: 'start',
-        xAdjust: 6,
-        backgroundColor: '#C44545',
-        color: '#fff',
+        display: true, content: 'P'+p+': '+fmtVal(cst[key])+' dni', position: 'start', xAdjust: 6,
+        backgroundColor: '#C44545', color: '#fff',
         font: { size: 11, weight: '600', family: "'Inter', sans-serif" },
-        padding: { top:3, bottom:3, left:6, right:6 },
-        borderRadius: 4
+        padding: { top:3, bottom:3, left:6, right:6 }, borderRadius: 4
       }
     };
   });
   return ann;
 }
+
+function xmrAnnotations(){
+  const ann = {};
+  const showLabels = activeSizes.size === 1;
+  const showZones = activeSizes.size === 1;
+
+  SIZE_ORDER.forEach(size => {
+    if(!activeSizes.has(size)) return;
+    const xr = xmrResults[size];
+    if(!xr || xr.mrBar === null) return;
+    const color = SIZE_META[size].color;
+    const mkLabel = (text) => !showLabels ? { display:false } : {
+      display: true, content: text, position: 'start', xAdjust: 6,
+      backgroundColor: color, color: '#fff',
+      font: { size: 10.5, weight: '600', family: "'Inter', sans-serif" },
+      padding: { top:2, bottom:2, left:5, right:5 }, borderRadius: 4
+    };
+
+    if(showZones){
+      ann[size+'_z1u'] = { type:'line', yMin:xr.zone.upper1, yMax:xr.zone.upper1, borderColor: color+'40', borderWidth:1, borderDash:[2,3], label:{display:false} };
+      ann[size+'_z1l'] = { type:'line', yMin:xr.zone.lower1, yMax:xr.zone.lower1, borderColor: color+'40', borderWidth:1, borderDash:[2,3], label:{display:false} };
+      ann[size+'_z2u'] = { type:'line', yMin:xr.zone.upper2, yMax:xr.zone.upper2, borderColor: color+'60', borderWidth:1, borderDash:[2,3], label:{display:false} };
+      ann[size+'_z2l'] = { type:'line', yMin:xr.zone.lower2, yMax:xr.zone.lower2, borderColor: color+'60', borderWidth:1, borderDash:[2,3], label:{display:false} };
+    }
+    ann[size+'_mean'] = { type:'line', yMin:xr.mean, yMax:xr.mean, borderColor: color, borderWidth:2, borderDash:[], label: mkLabel('x̄ '+size+': '+fmtVal(xr.mean)+' dni') };
+    ann[size+'_unpl'] = { type:'line', yMin:xr.UNPL, yMax:xr.UNPL, borderColor: color, borderWidth:1.75, borderDash:[8,4], label: mkLabel('UNPL '+size+': '+fmtVal(xr.UNPL)+' dni') };
+    ann[size+'_lnpl'] = { type:'line', yMin:xr.LNPL, yMax:xr.LNPL, borderColor: color, borderWidth:1.75, borderDash:[8,4], label: mkLabel('LNPL '+size+': '+fmtVal(xr.LNPL)+' dni') };
+  });
+  return ann;
+}
+
+function buildAnnotations(){
+  return chartMode === 'xmr' ? xmrAnnotations() : percentileAnnotations();
+}
+
+recomputeXmRResults();
 
 const chart = new Chart(ctx, {
   type: 'scatter',
@@ -472,28 +737,26 @@ const chart = new Chart(ctx, {
     responsive: true,
     maintainAspectRatio: false,
     interaction: { mode: 'nearest', intersect: true },
+    onClick: (evt, elements) => {
+      if(!elements.length) return;
+      const el = elements[0];
+      const point = chart.data.datasets[el.datasetIndex].data[el.index];
+      openDeleteModal(point.id);
+    },
+    onHover: (evt, elements) => {
+      evt.native.target.style.cursor = elements.length ? 'pointer' : 'pointer';
+    },
     scales: {
       x: {
         type: 'linear',
-        min: tsMin - tsPad,
-        max: tsMax + tsPad,
+        min: trackMin, max: trackMax,
         grid: { color: '#EEF1F4' },
-        ticks: {
-          color: '#5C6B7A',
-          font: { size: 11.5, family: "'Inter', sans-serif" },
-          maxTicksLimit: 8,
-          callback: v => fmtAxis(v)
-        }
+        ticks: { color: '#5C6B7A', font: { size: 11.5, family: "'Inter', sans-serif" }, maxTicksLimit: 8, callback: v => fmtAxis(v) }
       },
       y: {
         beginAtZero: true,
         grid: { color: '#EEF1F4' },
-        title: {
-          display: true,
-          text: 'Czas realizacji (dni)',
-          color: '#5C6B7A',
-          font: { size: 12, weight: '600', family: "'Inter', sans-serif" }
-        },
+        title: { display: true, text: 'Czas realizacji (dni)', color: '#5C6B7A', font: { size: 12, weight: '600', family: "'Inter', sans-serif" } },
         ticks: { color: '#5C6B7A', font: { size: 11.5, family: "'Inter', sans-serif" } }
       }
     },
@@ -503,58 +766,198 @@ const chart = new Chart(ctx, {
         backgroundColor: '#16212E',
         titleFont: { size: 12.5, family: "'Inter', sans-serif", weight: '600' },
         bodyFont: { size: 12.5, family: "'Inter', sans-serif" },
-        padding: 10,
-        cornerRadius: 7,
-        displayColors: false,
+        padding: 10, cornerRadius: 7, displayColors: false,
         callbacks: {
           title: items => fmtShort(items[0].raw.x),
           label: item => {
             const r = item.raw;
-            return 'Rozmiar ' + r.size + ' · ' + r.y + ' dni';
+            const base = 'Rozmiar ' + r.size + ' · ' + r.y + ' dni';
+            const tag = r.origin === 'added' ? ' (dodane w sesji)' : '';
+            const signal = (r.flags && r.flags.length) ? (' · ⚠ sygnał: reguła ' + r.flags.join(', ')) : '';
+            return base + tag + signal + ' · kliknij, aby usunąć';
           }
         }
       },
-      annotation: { annotations: refLineAnnotations() }
+      annotation: { annotations: buildAnnotations() }
     }
   }
 });
 
 function updateVisibleNote(){
-  const n = data.filter(d => activeSizes.has(d.size)).length;
-  document.getElementById('visiblePointsNote').textContent = 'Widoczne: ' + n + ' z ' + data.length + ' zadań';
+  const visibleOnChart = workingData.filter(d => activeSizes.has(d.size) && inRange(d.ts)).length;
+  document.getElementById('visiblePointsNote').textContent =
+    'Widoczne na wykresie: ' + visibleOnChart + ' z ' + workingData.length + ' zadań w bazie';
 }
 
-function refresh(){
-  SIZE_ORDER.forEach((size, i) => { chart.data.datasets[i].hidden = !activeSizes.has(size); });
-  chart.options.plugins.annotation.annotations = refLineAnnotations();
-  chart.update();
-  renderCards();
-  updateVisibleNote();
-  document.querySelectorAll('.chip').forEach(chip => {
+function updateEditSummary(){
+  const added = workingData.filter(d => d.origin === 'added').length;
+  document.getElementById('addedCount').textContent = added;
+  document.getElementById('deletedCount').textContent = deletedStack.length;
+  document.getElementById('undoDeleteBtn').disabled = deletedStack.length === 0;
+}
+
+function updateChipStates(){
+  document.querySelectorAll('.chip[data-size]').forEach(chip => {
     chip.setAttribute('data-active', activeSizes.has(chip.dataset.size));
   });
 }
 
-document.querySelectorAll('.chip').forEach(chip => {
+function updateModeUI(){
+  document.querySelectorAll('#viewModeToggle .seg-btn').forEach(btn => {
+    btn.setAttribute('data-active', btn.dataset.mode === chartMode);
+  });
+  document.querySelectorAll('.legend-item[data-mode]').forEach(el => {
+    el.classList.toggle('mode-active', el.dataset.mode === chartMode);
+  });
+  document.getElementById('rulesHint').style.display = chartMode === 'xmr' ? 'block' : 'none';
+}
+
+function refreshData(){
+  recomputeXmRResults();
+  chart.options.scales.x.min = trackMin;
+  chart.options.scales.x.max = trackMax;
+  SIZE_ORDER.forEach((size, i) => { chart.data.datasets[i] = buildDataset(size); });
+  chart.options.plugins.annotation.annotations = buildAnnotations();
+  chart.update();
+  renderCards();
+  renderSlider();
+  updateVisibleNote();
+  updateEditSummary();
+  updateChipStates();
+  updateModeUI();
+}
+
+document.querySelectorAll('#viewModeToggle .seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    chartMode = btn.dataset.mode;
+    refreshData();
+  });
+});
+
+// ---------- Size filter chips ----------
+document.querySelectorAll('.chip[data-size]').forEach(chip => {
   chip.addEventListener('click', () => {
     const size = chip.dataset.size;
     if(activeSizes.has(size)){
-      if(activeSizes.size === 1) return; // co najmniej jeden rozmiar musi być aktywny
+      if(activeSizes.size === 1) return;
       activeSizes.delete(size);
     } else {
       activeSizes.add(size);
     }
-    refresh();
+    refreshData();
+  });
+});
+document.getElementById('resetSizesBtn').addEventListener('click', () => {
+  activeSizes = new Set(SIZE_ORDER);
+  refreshData();
+});
+
+// ---------- Delete modal ----------
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalDetail = document.getElementById('modalDetail');
+
+function openDeleteModal(id){
+  const rec = workingData.find(d => d.id === id);
+  if(!rec) return;
+  pendingDeleteId = id;
+  const startTxt = rec.start ? (fmtShort(tsOf(rec.start)) + ' → ') : '';
+  modalDetail.textContent = startTxt + fmtShort(rec.ts) + ' · Rozmiar ' + rec.size + ' · ' + rec.leadTime + ' dni';
+  modalBackdrop.classList.add('open');
+}
+function closeDeleteModal(){
+  pendingDeleteId = null;
+  modalBackdrop.classList.remove('open');
+}
+document.getElementById('modalCancel').addEventListener('click', closeDeleteModal);
+modalBackdrop.addEventListener('click', e => { if(e.target === modalBackdrop) closeDeleteModal(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && modalBackdrop.classList.contains('open')) closeDeleteModal(); });
+
+document.getElementById('modalConfirm').addEventListener('click', () => {
+  if(pendingDeleteId === null) return;
+  const idx = workingData.findIndex(d => d.id === pendingDeleteId);
+  if(idx !== -1){
+    const [removed] = workingData.splice(idx, 1);
+    deletedStack.push(removed);
+  }
+  closeDeleteModal();
+  recomputeTrackBounds();
+  refreshData();
+});
+
+document.getElementById('undoDeleteBtn').addEventListener('click', () => {
+  if(!deletedStack.length) return;
+  const rec = deletedStack.pop();
+  workingData.push(rec);
+  recomputeTrackBounds();
+  refreshData();
+});
+
+document.getElementById('resetAllBtn').addEventListener('click', () => {
+  nextId = RAW_DATA.length;
+  workingData = RAW_DATA.map((d,i) => ({ id: i, date: d.date, ts: tsOf(d.date), size: d.size, leadTime: d.leadTime, origin: 'original', start: null }));
+  deletedStack = [];
+  activeSizes = new Set(SIZE_ORDER);
+  trackMin = undefined; rangeMin = undefined;
+  recomputeTrackBounds();
+  refreshData();
+  showFeedback('', '');
+});
+
+// ---------- Add task form ----------
+const newStartEl = document.getElementById('newStart');
+const newEndEl = document.getElementById('newEnd');
+const feedbackEl = document.getElementById('formFeedback');
+
+function showFeedback(text, type){
+  feedbackEl.textContent = text;
+  feedbackEl.className = 'form-feedback' + (type ? ' ' + type : '');
+}
+
+function validateForm(showPreview){
+  const s = newStartEl.value, e = newEndEl.value;
+  if(!s || !e){ if(showPreview) showFeedback('', ''); return null; }
+  const sTs = tsOf(s), eTs = tsOf(e);
+  if(eTs < sTs){ showFeedback('Data zakończenia nie może być wcześniejsza niż data startu.', 'error'); return null; }
+  const days = Math.round((eTs - sTs) / DAY_MS);
+  if(showPreview) showFeedback('Czas realizacji: ' + days + ' dni', 'preview');
+  return days;
+}
+
+newStartEl.addEventListener('change', () => { if(newEndEl.value) newEndEl.min = newStartEl.value; validateForm(true); });
+newEndEl.addEventListener('change', () => validateForm(true));
+
+document.querySelectorAll('.chip[data-newsize]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    selectedNewSize = chip.dataset.newsize;
+    document.querySelectorAll('.chip[data-newsize]').forEach(c => c.setAttribute('data-active', c === chip));
+    chip.setAttribute('data-size', selectedNewSize); // reuse colour rules keyed by data-size
   });
 });
 
-document.getElementById('resetBtn').addEventListener('click', () => {
-  activeSizes = new Set(SIZE_ORDER);
-  refresh();
+document.getElementById('addTaskBtn').addEventListener('click', () => {
+  const s = newStartEl.value, e = newEndEl.value;
+  if(!s || !e){ showFeedback('Podaj datę startu i zakończenia.', 'error'); return; }
+  if(!selectedNewSize){ showFeedback('Wybierz rozmiar zadania (S / M / L).', 'error'); return; }
+  const days = validateForm(false);
+  if(days === null){ return; }
+
+  workingData.push({
+    id: nextId++, date: e, ts: tsOf(e), size: selectedNewSize, leadTime: days,
+    origin: 'added', start: s
+  });
+
+  recomputeTrackBounds();
+  refreshData();
+  showFeedback('Dodano zadanie: ' + selectedNewSize + ' · ' + days + ' dni.', 'preview');
+
+  newStartEl.value = ''; newEndEl.value = ''; newEndEl.removeAttribute('min');
+  selectedNewSize = null;
+  document.querySelectorAll('.chip[data-newsize]').forEach(c => { c.setAttribute('data-active', 'false'); c.removeAttribute('data-size'); });
 });
 
-renderCards();
-updateVisibleNote();
+// ---------- Init ----------
+recomputeTrackBounds();
+refreshData();
 </script>
 </body>
 </html>
