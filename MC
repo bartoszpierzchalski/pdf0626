@@ -1,1 +1,342 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Symulacja Monte Carlo — prognoza backlogu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js"></script>
+<style>
+  :root{
+    --bg:#F4F6F8; --panel:#FFFFFF; --panel-border:#E1E6EB;
+    --ink:#16212E; --ink-soft:#5C6B7A; --ink-faint:#94A1AE;
 
+    --c-base:#1C7C97;       --c-base-soft:#E2F1F4;
+    --c-scope:#DD8A1F;      --c-scope-soft:#FBEEDB;
+    --c-cap:#6457C6;        --c-cap-soft:#ECE9FA;
+    --c-combo:#C44545;      --c-combo-soft:#F8E4E4;
+
+    --radius-lg:16px; --radius-md:10px;
+    --font-display:'Space Grotesk','Segoe UI',Arial,sans-serif;
+    --font-body:'Inter','Segoe UI',Arial,sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background:var(--bg); color:var(--ink); font-family:var(--font-body); -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:28px 20px 40px; }
+
+  .eyebrow{ font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 8px; }
+  h1{ font-family:var(--font-display); font-size:27px; font-weight:600; letter-spacing:-.01em; margin:0 0 6px; }
+  .subtitle{ font-size:14px; color:var(--ink-soft); margin:0 0 22px; max-width:820px; }
+  .subtitle b{ color:var(--ink); font-weight:600; }
+
+  .panel{ background:var(--panel); border:1px solid var(--panel-border); border-radius:var(--radius-lg); padding:22px 22px 16px; margin-bottom:18px; }
+  .panel-title{ font-family:var(--font-display); font-size:16.5px; font-weight:600; margin-bottom:4px; }
+  .panel-desc{ font-size:12.5px; color:var(--ink-soft); margin:2px 0 0; }
+
+  /* input summary */
+  .input-grid{ display:grid; grid-template-columns: repeat(4,1fr); gap:14px; margin-top:14px; }
+  .input-item{ border:1px solid var(--panel-border); border-radius:var(--radius-md); padding:12px 14px; }
+  .input-label{ font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-faint); font-weight:600; margin-bottom:5px; }
+  .input-value{ font-family:var(--font-display); font-size:16.5px; font-weight:600; }
+  .spark{ display:flex; align-items:flex-end; gap:3px; height:34px; margin-top:6px; }
+  .spark .bar{ flex:1; background:var(--c-base); border-radius:2px 2px 0 0; min-width:6px; }
+
+  /* scenario cards */
+  .scenario-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:14px; }
+  .scenario-card{ border-radius:var(--radius-md); padding:16px 18px; border:1.5px solid var(--panel-border); }
+  .scenario-card.base{ border-color:var(--c-base); background:var(--c-base-soft); }
+  .scenario-card.scope{ border-color:var(--c-scope); background:var(--c-scope-soft); }
+  .scenario-card.cap{ border-color:var(--c-cap); background:var(--c-cap-soft); }
+  .scenario-card.combo{ border-color:var(--c-combo); background:var(--c-combo-soft); }
+  .scenario-head{ display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+  .scenario-dot{ width:10px; height:10px; border-radius:50%; }
+  .scenario-card.base .scenario-dot{ background:var(--c-base); }
+  .scenario-card.scope .scenario-dot{ background:var(--c-scope); }
+  .scenario-card.cap .scenario-dot{ background:var(--c-cap); }
+  .scenario-card.combo .scenario-dot{ background:var(--c-combo); }
+  .scenario-name{ font-family:var(--font-display); font-weight:600; font-size:14.5px; }
+  .scenario-desc{ font-size:12px; color:var(--ink-soft); margin:0 0 12px; line-height:1.5; }
+  .scenario-rows{ display:flex; flex-direction:column; gap:8px; }
+  .scenario-row{ display:flex; justify-content:space-between; align-items:baseline; font-size:12.5px; gap:10px; }
+  .scenario-row .lbl{ color:var(--ink-soft); }
+  .scenario-row .val{ font-family:var(--font-display); font-weight:600; color:var(--ink); text-align:right; }
+  .scenario-divider{ height:1px; background:rgba(0,0,0,.08); margin:4px 0; }
+
+  .chart-area{ position:relative; height:360px; margin-top:14px; }
+  .chart-area.small{ height:300px; }
+  .legend-row{ display:flex; flex-wrap:wrap; gap:16px; align-items:center; margin-top:14px; padding-top:12px; border-top:1px solid var(--panel-border); font-size:12.5px; color:var(--ink-soft); }
+  .legend-item{ display:flex; align-items:center; gap:7px; }
+  .legend-swatch{ width:14px; height:3px; border-radius:2px; }
+
+  .note-box{ background:var(--bg); border:1px solid var(--panel-border); border-radius:var(--radius-md); padding:12px 14px; font-size:12.5px; color:var(--ink-soft); line-height:1.55; margin-top:14px; }
+  .note-box b{ color:var(--ink); }
+
+  .footnote{ font-size:12px; color:var(--ink-faint); line-height:1.6; }
+
+  @media (max-width:860px){
+    .input-grid{ grid-template-columns:repeat(2,1fr); }
+    .scenario-grid{ grid-template-columns:1fr; }
+  }
+  @media (max-width:600px){
+    .input-grid{ grid-template-columns:1fr 1fr; }
+    .chart-area{ height:300px; }
+    h1{ font-size:22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Symulacja Monte Carlo · prognoza realizacji backlogu</p>
+  <h1>Kiedy skończymy i ile dostarczymy</h1>
+  <p class="subtitle">Prognoza dla <b>62 elementów backlogu</b> na bazie historycznego tempa dostarczania z 11 sprintów (2‑tygodniowych). Symulacja losuje 10 000 razy historyczne tempo i zlicza, ile sprintów potrzeba do zamknięcia backlogu oraz ile elementów powstanie w pierwszych 8 tygodniach (do końca sierpnia 2026). Cztery scenariusze pokazują wpływ wzrostu zakresu i zmian pojemności zespołu — każdy oznaczony osobno, plus wariant łączny.</p>
+
+  <div class="panel">
+    <div class="panel-title">Dane wejściowe symulacji</div>
+    <p class="panel-desc">Tempo dostarczania w ostatnich 11 sprintach (2‑tyg.), użyte jako rozkład losowania (bootstrap).</p>
+    <div class="input-grid">
+      <div class="input-item">
+        <div class="input-label">Backlog</div>
+        <div class="input-value">62 elementy</div>
+      </div>
+      <div class="input-item">
+        <div class="input-label">Start symulacji</div>
+        <div class="input-value">1 lipca 2026</div>
+      </div>
+      <div class="input-item">
+        <div class="input-label">Horyzont „ile dostarczymy”</div>
+        <div class="input-value">do 31 sie 2026</div>
+      </div>
+      <div class="input-item">
+        <div class="input-label">Iteracje</div>
+        <div class="input-value">10 000</div>
+      </div>
+      <div class="input-item" style="grid-column: span 4;">
+        <div class="input-label">Historyczne tempo (zadania / sprint): 5, 4, 4, 5, 6, 4, 2, 3, 2, 5, 6</div>
+        <div class="spark" id="histSpark"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Cztery scenariusze</div>
+    <p class="panel-desc">Każdy czynnik ryzyka oznaczony osobno względem scenariusza bazowego, plus wariant łączny ze wszystkimi efektami naraz.</p>
+    <div class="scenario-grid" id="scenarioGrid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Kiedy skończymy — prawdopodobieństwo zakończenia backlogu w czasie</div>
+    <p class="panel-desc">Dla każdego scenariusza: % symulacji, w których backlog jest zamknięty do danej daty. Punkt przecięcia z 85%/95% to szukana data ukończenia.</p>
+    <div class="chart-area"><canvas id="cdfChart"></canvas></div>
+    <div class="legend-row" id="cdfLegend"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Ile dostarczymy do 31 sierpnia 2026</div>
+    <p class="panel-desc">Liczba elementów backlogu zrobionych w pierwszych 8 tygodniach (4 sprinty), przy zachowanym poziomie pewności.</p>
+    <div class="chart-area small"><canvas id="howManyChart"></canvas></div>
+    <div class="note-box">
+      „≥85% pewności” / „≥95% pewności” oznacza liczbę elementów, którą zespół dostarczy w <b>co najmniej</b> tym odsetku symulacji — to bezpieczna, konserwatywna prognoza (niższa liczba = wyższa pewność), nie wynik najbardziej prawdopodobny (mediana jest zwykle wyższa).
+    </div>
+  </div>
+
+  <p class="footnote">
+    Metodologia: symulacja Monte Carlo (bootstrap) — w każdej z 10 000 iteracji losowane jest, ze zwracaniem, historyczne tempo dla każdego kolejnego sprintu (2 tyg.), aż suma osiągnie wielkość backlogu; zliczana jest liczba potrzebnych sprintów oraz liczba elementów gotowych po 4 sprintach (8 tyg., do 31.08.2026). Wzrost zakresu: 62 × 1,3 = 80,6 → zaokrąglone w górę do <b>81 elementów</b>. Zmiana pojemności: sprinty zaczynające się przed 1.09.2026 (lipiec–sierpień, urlopy) liczone z czynnikiem <b>0,5×</b> tempa, sprinty od 1.09.2026 (naprawy wypuszczonych produktów) z czynnikiem <b>0,75×</b> — czynnik mnoży losowo wybraną historyczną wartość tempa dla danego sprintu i jest stosowany trwale od września (nie tylko w samym wrześniu). Data zakończenia = data startu + liczba sprintów × 14 dni. Wszystkie cztery scenariusze korzystają z tego samego rozkładu historycznego tempa (11 sprintów: 5,4,4,5,6,4,2,3,2,5,6), różnią się tylko wielkością backlogu i/lub czynnikiem pojemności.
+  </p>
+
+</div>
+
+<script>
+const HIST = [5,4,4,5,6,4,2,3,2,5,6];
+const START = new Date('2026-07-01T00:00:00Z');
+const SEPT_START = new Date('2026-09-01T00:00:00Z');
+const DAY_MS = 86400000;
+const SPRINT_DAYS = 14;
+const ITERATIONS = 10000;
+const HORIZON_SPRINTS = 4; // 8 weeks -> end of August 2026
+const MAX_SPRINTS = 300;
+
+const SCOPE_BACKLOG = Math.ceil(62 * 1.3); // 81
+
+function capacityFactor(sprintIdx, applyCapacity){
+  if(!applyCapacity) return 1.0;
+  const start = new Date(START.getTime() + (sprintIdx-1)*SPRINT_DAYS*DAY_MS);
+  return start < SEPT_START ? 0.5 : 0.75;
+}
+
+function simulate(backlog, applyCapacity){
+  const sprintsNeeded = new Array(ITERATIONS);
+  const deliveredAtHorizon = new Array(ITERATIONS);
+  for(let it=0; it<ITERATIONS; it++){
+    let total = 0, sprint = 0, atHorizon = null;
+    while(total < backlog && sprint < MAX_SPRINTS){
+      sprint++;
+      const base = HIST[Math.floor(Math.random()*HIST.length)];
+      const f = capacityFactor(sprint, applyCapacity);
+      total += Math.max(0, Math.round(base*f));
+      if(sprint === HORIZON_SPRINTS) atHorizon = Math.min(total, backlog);
+    }
+    if(atHorizon === null) atHorizon = backlog; // finished before reaching the horizon
+    sprintsNeeded[it] = sprint;
+    deliveredAtHorizon[it] = atHorizon;
+  }
+  return { sprintsNeeded, deliveredAtHorizon };
+}
+
+function percentile(arr, p){
+  const s = [...arr].sort((a,b)=>a-b);
+  const idx = (p/100)*(s.length-1);
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  return lo===hi ? s[lo] : s[lo] + (s[hi]-s[lo])*(idx-lo);
+}
+function dateAfterSprints(sprints){
+  return new Date(START.getTime() + sprints*SPRINT_DAYS*DAY_MS);
+}
+const MONTHS = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+const MONTHS_SHORT = ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+function fmtDate(d){ return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
+function fmtAxis(d){ return MONTHS_SHORT[d.getUTCMonth()] + ' ' + (''+d.getUTCFullYear()).slice(2); }
+
+const SCENARIOS = [
+  { key:'base',  cls:'base',  name:'Bazowy',
+    desc:'62 elementy, bez wzrostu zakresu i bez zmian pojemności zespołu — punkt odniesienia.',
+    backlog:62, applyCapacity:false, color:'#1C7C97' },
+  { key:'scope', cls:'scope', name:'Wzrost zakresu (+30%)',
+    desc:'81 elementów (62 + 30% nowych wymagań), pojemność zespołu bez zmian — izolowany wpływ samego zakresu.',
+    backlog:SCOPE_BACKLOG, applyCapacity:false, color:'#DD8A1F' },
+  { key:'cap',   cls:'cap',   name:'Zmiana pojemności (urlopy + naprawy)',
+    desc:'62 elementy, ale lipiec–sierpień: 50% zespołu na urlopie (0,5×), od września: 25% czasu na naprawy (0,75×) — izolowany wpływ pojemności.',
+    backlog:62, applyCapacity:true, color:'#6457C6' },
+  { key:'combo', cls:'combo', name:'Łącznie (realistyczny)',
+    desc:'81 elementów + te same ograniczenia pojemności — wszystkie znane czynniki naraz.',
+    backlog:SCOPE_BACKLOG, applyCapacity:true, color:'#C44545' }
+];
+
+SCENARIOS.forEach(sc => { Object.assign(sc, simulate(sc.backlog, sc.applyCapacity)); });
+
+// ---------- Histogram sparkline of historical throughput ----------
+const sparkEl = document.getElementById('histSpark');
+const maxHist = Math.max(...HIST);
+sparkEl.innerHTML = HIST.map(v => `<div class="bar" style="height:${Math.max(6, v/maxHist*34)}px" title="${v} zadań"></div>`).join('');
+
+// ---------- Scenario cards ----------
+const grid = document.getElementById('scenarioGrid');
+SCENARIOS.forEach(sc => {
+  const p85s = percentile(sc.sprintsNeeded, 85), p95s = percentile(sc.sprintsNeeded, 95);
+  const d85 = percentile(sc.deliveredAtHorizon, 15), d95 = percentile(sc.deliveredAtHorizon, 5);
+  const card = document.createElement('div');
+  card.className = 'scenario-card ' + sc.cls;
+  card.innerHTML = `
+    <div class="scenario-head"><span class="scenario-dot"></span><span class="scenario-name">${sc.name}</span></div>
+    <p class="scenario-desc">${sc.desc}</p>
+    <div class="scenario-rows">
+      <div class="scenario-row"><span class="lbl">Backlog</span><span class="val">${sc.backlog} elem.</span></div>
+      <div class="scenario-divider"></div>
+      <div class="scenario-row"><span class="lbl">Data zakończenia — P85</span><span class="val">${fmtDate(dateAfterSprints(p85s))}</span></div>
+      <div class="scenario-row"><span class="lbl">Data zakończenia — P95</span><span class="val">${fmtDate(dateAfterSprints(p95s))}</span></div>
+      <div class="scenario-row"><span class="lbl">Liczba sprintów (P85 / P95)</span><span class="val">${Math.round(p85s)} / ${Math.round(p95s)}</span></div>
+      <div class="scenario-divider"></div>
+      <div class="scenario-row"><span class="lbl">Dostarczone do 31.08.26 — ≥85% pewności</span><span class="val">${Math.round(d85)} elem.</span></div>
+      <div class="scenario-row"><span class="lbl">Dostarczone do 31.08.26 — ≥95% pewności</span><span class="val">${Math.round(d95)} elem.</span></div>
+    </div>`;
+  grid.appendChild(card);
+});
+
+// ---------- CDF chart ----------
+const maxSprintAxis = Math.ceil(Math.max(...SCENARIOS.map(sc => percentile(sc.sprintsNeeded,97))) ) + 1;
+const cdfLabels = [];
+for(let k=0;k<=maxSprintAxis;k++) cdfLabels.push(fmtAxis(dateAfterSprints(k)));
+
+function buildCdf(sprintsNeeded){
+  const counts = new Array(maxSprintAxis+1).fill(0);
+  sprintsNeeded.forEach(s => { if(s<=maxSprintAxis) counts[s] = (counts[s]||0)+1; else counts[maxSprintAxis]++; });
+  const cdf = [];
+  let running = 0;
+  for(let k=0;k<=maxSprintAxis;k++){ running += counts[k]; cdf.push(running/sprintsNeeded.length*100); }
+  return cdf;
+}
+
+const cdfCtx = document.getElementById('cdfChart').getContext('2d');
+const cdfChart = new Chart(cdfCtx, {
+  type: 'line',
+  data: {
+    labels: cdfLabels,
+    datasets: SCENARIOS.map(sc => ({
+      label: sc.name,
+      data: buildCdf(sc.sprintsNeeded),
+      borderColor: sc.color,
+      backgroundColor: sc.color,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      borderWidth: 2.25,
+      tension: 0.15,
+      fill: false
+    }))
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction: { mode:'index', intersect:false },
+    scales: {
+      x: { grid:{ color:'#EEF1F4' }, ticks:{ color:'#5C6B7A', font:{ size:11, family:"'Inter', sans-serif" }, maxTicksLimit:12 } },
+      y: { min:0, max:100, grid:{ color:'#EEF1F4' },
+        title:{ display:true, text:'% symulacji zakończonych', color:'#5C6B7A', font:{ size:12, weight:'600', family:"'Inter', sans-serif" } },
+        ticks:{ color:'#5C6B7A', font:{ size:11, family:"'Inter', sans-serif" }, callback:v=>v+'%' } }
+    },
+    plugins: {
+      legend:{ display:false },
+      tooltip: {
+        backgroundColor:'#16212E', padding:10, cornerRadius:7,
+        titleFont:{ size:12.5, family:"'Inter', sans-serif", weight:'600' },
+        bodyFont:{ size:12, family:"'Inter', sans-serif" }
+      },
+      annotation: {
+        annotations: {
+          l85: { type:'line', yMin:85, yMax:85, borderColor:'#94A1AE', borderWidth:1.25, borderDash:[5,4],
+            label:{ display:true, content:'85%', position:'start', backgroundColor:'#94A1AE', color:'#fff', font:{size:10.5,weight:'600',family:"'Inter', sans-serif"}, padding:{top:2,bottom:2,left:5,right:5}, borderRadius:4 } },
+          l95: { type:'line', yMin:95, yMax:95, borderColor:'#5C6B7A', borderWidth:1.25, borderDash:[5,4],
+            label:{ display:true, content:'95%', position:'start', backgroundColor:'#5C6B7A', color:'#fff', font:{size:10.5,weight:'600',family:"'Inter', sans-serif"}, padding:{top:2,bottom:2,left:5,right:5}, borderRadius:4 } }
+        }
+      }
+    }
+  }
+});
+document.getElementById('cdfLegend').innerHTML = SCENARIOS.map(sc =>
+  `<span class="legend-item"><span class="legend-swatch" style="background:${sc.color}"></span>${sc.name}</span>`).join('');
+
+// ---------- "How many by Aug 31" comparison chart ----------
+const hmCtx = document.getElementById('howManyChart').getContext('2d');
+const hmLabels = SCENARIOS.map(sc => sc.name);
+function seriesFor(p){ return SCENARIOS.map(sc => Math.round(percentile(sc.deliveredAtHorizon, p))); }
+
+const howManyChart = new Chart(hmCtx, {
+  type: 'bar',
+  data: {
+    labels: hmLabels,
+    datasets: [
+      { label:'Mediana (P50)', data: seriesFor(50), backgroundColor:'#CBD3DA', borderRadius:4 },
+      { label:'≥85% pewności', data: seriesFor(15), backgroundColor:'#5C6B7A', borderRadius:4 },
+      { label:'≥95% pewności', data: seriesFor(5),  backgroundColor:'#16212E', borderRadius:4 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    scales: {
+      x: { grid:{ display:false }, ticks:{ color:'#5C6B7A', font:{ size:11.5, family:"'Inter', sans-serif" } } },
+      y: { beginAtZero:true, grid:{ color:'#EEF1F4' },
+        title:{ display:true, text:'Elementy dostarczone', color:'#5C6B7A', font:{ size:12, weight:'600', family:"'Inter', sans-serif" } },
+        ticks:{ color:'#5C6B7A', font:{ size:11.5, family:"'Inter', sans-serif" } } }
+    },
+    plugins: {
+      legend: { position:'top', align:'end', labels:{ boxWidth:12, font:{ size:12, family:"'Inter', sans-serif" }, color:'#5C6B7A' } },
+      tooltip: { backgroundColor:'#16212E', padding:10, cornerRadius:7,
+        titleFont:{ size:12.5, family:"'Inter', sans-serif", weight:'600' }, bodyFont:{ size:12, family:"'Inter', sans-serif" } }
+    }
+  }
+});
+</script>
+</body>
+</html>
