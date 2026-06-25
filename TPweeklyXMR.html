@@ -1,1 +1,415 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raport XmR — Przepustowość tygodniowa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js"></script>
+<style>
+  :root{
+    --bg: #F4F6F8;
+    --panel: #FFFFFF;
+    --panel-border: #E1E6EB;
+    --ink: #16212E;
+    --ink-soft: #5C6B7A;
+    --ink-faint: #94A1AE;
 
+    --accent: #1C7C97;
+    --accent-soft: #E2F1F4;
+    --ref-line: #C44545;
+
+    --radius-lg: 16px;
+    --radius-md: 10px;
+
+    --font-display: 'Space Grotesk', 'Segoe UI', Arial, sans-serif;
+    --font-body: 'Inter', 'Segoe UI', Arial, sans-serif;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background: var(--bg); color: var(--ink); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+  .wrap{ max-width: 1140px; margin: 0 auto; padding: 28px 20px 40px; }
+
+  .eyebrow{ font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 8px; }
+  h1{ font-family: var(--font-display); font-size: 27px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 6px; }
+  .subtitle{ font-size: 14px; color: var(--ink-soft); margin: 0 0 22px; max-width: 760px; }
+  .subtitle b{ color: var(--ink); font-weight: 600; }
+
+  .panel{ background: var(--panel); border: 1px solid var(--panel-border); border-radius: var(--radius-lg); padding: 22px 22px 16px; margin-bottom: 18px; }
+  .panel-title-row{ display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom: 4px; }
+  .panel-title{ font-family: var(--font-display); font-size: 16.5px; font-weight: 600; }
+  .panel-tag{ font-size: 11.5px; font-weight: 600; color: var(--ink-faint); background: var(--bg); border: 1px solid var(--panel-border); border-radius: 999px; padding: 3px 10px; }
+  .panel-desc{ font-size: 12.5px; color: var(--ink-soft); margin: 4px 0 0; }
+
+  .stat-strip{ display:flex; flex-wrap:wrap; gap: 0; margin: 14px 0 4px; border: 1px solid var(--panel-border); border-radius: var(--radius-md); overflow:hidden; }
+  .stat-strip .stat{ flex: 1 1 auto; min-width: 96px; padding: 10px 14px; border-right: 1px solid var(--panel-border); }
+  .stat-strip .stat:last-child{ border-right: none; }
+  .stat-strip .stat-label{ font-size: 10.5px; letter-spacing:0.04em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; margin-bottom: 3px; }
+  .stat-strip .stat-value{ font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--ink); }
+  .stat-strip .stat-value .unit{ font-family: var(--font-body); font-size: 11.5px; font-weight: 500; color: var(--ink-faint); margin-left: 2px; }
+  .stat-strip .stat.signals .stat-value{ color: var(--ref-line); }
+  .stat-strip .stat.signals.zero .stat-value{ color: var(--ink-faint); }
+
+  .chart-area{ position: relative; height: 320px; margin-top: 14px; }
+
+  .legend-row{ display:flex; flex-wrap: wrap; gap: 16px; align-items:center; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--panel-border); font-size: 12.5px; color: var(--ink-soft); }
+  .legend-item{ display:flex; align-items:center; gap:7px; }
+  .legend-swatch{ width:16px; height:0; border-top: 2px solid var(--accent); }
+  .legend-swatch.median{ border-top: 2px solid var(--ink); }
+  .legend-swatch.limit{ border-top: 2px dashed var(--ref-line); }
+  .legend-swatch.zone{ border-top: 1.5px dotted var(--ink-faint); }
+  .legend-dot{ width:11px; height:11px; border-radius:50%; background:#fff; border: 2.5px solid var(--ref-line); }
+  .legend-dot.partial{ width:11px; height:11px; border-radius: 2px; background:#fff; border:2px solid var(--ink-soft); transform: rotate(45deg); }
+
+  .rules-list{ display:flex; flex-direction:column; gap: 14px; margin-top: 14px; }
+  .rule-item{ display:flex; gap: 14px; padding: 14px 16px; border: 1px solid var(--panel-border); border-radius: var(--radius-md); background: var(--bg); }
+  .rule-num{ flex: none; width: 34px; height:34px; border-radius:50%; background: var(--ink); color:#fff; font-family: var(--font-display); font-weight:600; font-size: 15px; display:flex; align-items:center; justify-content:center; }
+  .rule-body{ flex:1; }
+  .rule-title{ font-family: var(--font-display); font-weight:600; font-size: 14px; margin-bottom: 3px; }
+  .rule-desc{ font-size: 13px; color: var(--ink-soft); line-height:1.5; margin: 0 0 6px; }
+  .rule-scope{ display:inline-flex; gap:6px; }
+  .rule-scope span{ font-size: 10.5px; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+  .rule-scope span.dim{ background: #EFEFEF; color: var(--ink-faint); }
+
+  .footnote{ font-size: 12px; color: var(--ink-faint); line-height: 1.6; }
+
+  @media (max-width: 700px){
+    .chart-area{ height: 280px; }
+    .stat-strip .stat{ min-width: 80px; }
+    h1{ font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Raport XmR (Shewhart) · przepustowość tygodniowa</p>
+  <h1>Wykresy X i mR — przepustowość tygodniowa</h1>
+  <p class="subtitle">Dane dzienne zagregowane do tygodni (suma przepustowości z dni roboczych, bez sobót i niedziel). Linie centralne i granice naturalne procesu liczone na bazie <b>mediany</b>, nie średniej — zgodnie z klasycznym podejściem Shewharta (XmR), oddzielnie dla wykresu X (poziom procesu) i wykresu mR (zmienność, rozstęp ruchomy).</p>
+
+  <div class="panel">
+    <div class="panel-title-row">
+      <span class="panel-title">Wykres X — tygodniowa przepustowość</span>
+      <span class="panel-tag" id="xTag"></span>
+    </div>
+    <p class="panel-desc">Suma zadań zakończonych w danym tygodniu (pon–pt). Linia centralna to mediana; UNPL/LNPL to naturalne granice procesu.</p>
+    <div class="stat-strip" id="xStats"></div>
+    <div class="chart-area"><canvas id="xChart"></canvas></div>
+    <div class="legend-row">
+      <span class="legend-item"><span class="legend-swatch"></span>Przepustowość tygodniowa</span>
+      <span class="legend-item"><span class="legend-swatch median"></span>Mediana</span>
+      <span class="legend-item"><span class="legend-swatch limit"></span>UNPL / LNPL</span>
+      <span class="legend-item"><span class="legend-swatch zone"></span>strefy 1σ / 2σ</span>
+      <span class="legend-item"><span class="legend-dot"></span>punkt z sygnałem</span>
+      <span class="legend-item"><span class="legend-dot partial"></span>tydzień niepełny</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title-row">
+      <span class="panel-title">Wykres mR — rozstęp ruchomy między tygodniami</span>
+      <span class="panel-tag" id="mrTag"></span>
+    </div>
+    <p class="panel-desc">|różnica| między przepustowością tygodnia i tygodnia poprzedniego. Linia centralna to mediana mR; URL to górna granica naturalna (brak granicy dolnej — rozstęp nie może być ujemny).</p>
+    <div class="stat-strip" id="mrStats"></div>
+    <div class="chart-area"><canvas id="mrChart"></canvas></div>
+    <div class="legend-row">
+      <span class="legend-item"><span class="legend-swatch"></span>Rozstęp ruchomy (mR)</span>
+      <span class="legend-item"><span class="legend-swatch median"></span>Mediana mR</span>
+      <span class="legend-item"><span class="legend-swatch limit"></span>URL (górna granica)</span>
+      <span class="legend-item"><span class="legend-dot"></span>punkt z sygnałem</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title-row">
+      <span class="panel-title">Agenda — reguły wykrywania sygnałów</span>
+    </div>
+    <p class="panel-desc">Reguły 1–4 stosowane są do wykresu X (poziom procesu). Na wykresie mR stosujemy tylko regułę 1 — reguły 2–4 opisują przesunięcia poziomu procesu i nie mają standardowej interpretacji na wykresie rozstępu.</p>
+    <div class="rules-list">
+      <div class="rule-item">
+        <div class="rule-num">1</div>
+        <div class="rule-body">
+          <div class="rule-title">Punkt poza granicami naturalnymi (NPL)</div>
+          <p class="rule-desc">Pojedynczy punkt leży powyżej UNPL lub poniżej LNPL (poza ±2,66 × mediana mR od mediany). Najsilniejszy, jednorazowy sygnał — wskazuje na przyczynę specjalną w tym konkretnym tygodniu.</p>
+          <div class="rule-scope"><span>Wykres X</span><span>Wykres mR</span></div>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-num">2</div>
+        <div class="rule-body">
+          <div class="rule-title">2 z 3 kolejnych punktów w zewnętrznej 1/3 strefy</div>
+          <p class="rule-desc">2 z 3 kolejnych punktów leżą po tej samej stronie mediany, dalej niż 2/3 odległości do granicy (poza „2σ”). Umiarkowany sygnał możliwej zmiany procesu.</p>
+          <div class="rule-scope"><span>Wykres X</span><span class="dim">Wykres mR</span></div>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-num">3</div>
+        <div class="rule-body">
+          <div class="rule-title">3 z 5 kolejnych punktów poza 1 sigma</div>
+          <p class="rule-desc">3 z 5 kolejnych punktów leżą po tej samej stronie mediany, dalej niż 1/3 odległości do granicy (poza „1σ”). Umiarkowany, bardziej trwały sygnał.</p>
+          <div class="rule-scope"><span>Wykres X</span><span class="dim">Wykres mR</span></div>
+        </div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-num">4</div>
+        <div class="rule-body">
+          <div class="rule-title">8 kolejnych punktów po jednej stronie mediany</div>
+          <p class="rule-desc">8 kolejnych punktów leży po tej samej stronie mediany (niezależnie od odległości). Sygnał niewielkiej, ale trwałej zmiany poziomu procesu — przesunięcia.</p>
+          <div class="rule-scope"><span>Wykres X</span><span class="dim">Wykres mR</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="footnote">
+    Metodologia: dane dzienne odfiltrowane do dni roboczych (pon–pt), zsumowane do tygodni ISO (tydzień = pon–pt). UNPL/LNPL liczone jako mediana ± 2,66 × mediana mR (LNPL nie spada poniżej 0); URL na wykresie mR liczone jako 3,27 × mediana mR — stałe 2,66 i 3,27 to klasyczne współczynniki Shewharta dla wykresu indywidualnego (n=2), zastosowane tu do mediany zamiast średniej, zgodnie z konwencją używaną w analizie metryk flow (np. throughput w Kanbanie). Pierwszy tydzień (06.01.2025) zawiera tylko 4 dni robocze (wt–pt), ponieważ dane zaczynają się 07.01.2025 — oznaczony na wykresie jako tydzień niepełny. Dane wejściowe: Throughput_Daily.xlsx, n = 103 dni → 15 tygodni roboczych.
+  </p>
+
+</div>
+
+<script>
+const RAW_WEEKS = [{"weekStart": "2025-01-06", "firstDate": "2025-01-07", "lastDate": "2025-01-10", "nDays": 4, "total": 15}, {"weekStart": "2025-01-13", "firstDate": "2025-01-13", "lastDate": "2025-01-17", "nDays": 5, "total": 12}, {"weekStart": "2025-01-20", "firstDate": "2025-01-20", "lastDate": "2025-01-24", "nDays": 5, "total": 7}, {"weekStart": "2025-01-27", "firstDate": "2025-01-27", "lastDate": "2025-01-31", "nDays": 5, "total": 11}, {"weekStart": "2025-02-03", "firstDate": "2025-02-03", "lastDate": "2025-02-07", "nDays": 5, "total": 23}, {"weekStart": "2025-02-10", "firstDate": "2025-02-10", "lastDate": "2025-02-14", "nDays": 5, "total": 15}, {"weekStart": "2025-02-17", "firstDate": "2025-02-17", "lastDate": "2025-02-21", "nDays": 5, "total": 15}, {"weekStart": "2025-02-24", "firstDate": "2025-02-24", "lastDate": "2025-02-28", "nDays": 5, "total": 19}, {"weekStart": "2025-03-03", "firstDate": "2025-03-03", "lastDate": "2025-03-07", "nDays": 5, "total": 10}, {"weekStart": "2025-03-10", "firstDate": "2025-03-10", "lastDate": "2025-03-14", "nDays": 5, "total": 17}, {"weekStart": "2025-03-17", "firstDate": "2025-03-17", "lastDate": "2025-03-21", "nDays": 5, "total": 17}, {"weekStart": "2025-03-24", "firstDate": "2025-03-24", "lastDate": "2025-03-28", "nDays": 5, "total": 7}, {"weekStart": "2025-03-31", "firstDate": "2025-03-31", "lastDate": "2025-04-04", "nDays": 5, "total": 15}, {"weekStart": "2025-04-07", "firstDate": "2025-04-07", "lastDate": "2025-04-11", "nDays": 5, "total": 8}, {"weekStart": "2025-04-14", "firstDate": "2025-04-14", "lastDate": "2025-04-18", "nDays": 5, "total": 12}];
+
+function median(arr){
+  const s = [...arr].sort((a,b)=>a-b);
+  const n = s.length;
+  if(n===0) return null;
+  const mid = Math.floor(n/2);
+  return n % 2 ? s[mid] : (s[mid-1]+s[mid])/2;
+}
+function fmtVal(v){ return (v===null||v===undefined) ? '—' : (Math.round(v*10)/10).toString().replace('.0',''); }
+
+const MONTHS_SHORT = ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+function fmtShort(iso){
+  const d = new Date(iso+'T00:00:00Z');
+  return d.getUTCDate() + ' ' + MONTHS_SHORT[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+}
+function fmtDM(iso){
+  const d = new Date(iso+'T00:00:00Z');
+  return String(d.getUTCDate()).padStart(2,'0') + ' ' + MONTHS_SHORT[d.getUTCMonth()];
+}
+
+const weeks = RAW_WEEKS.map(w => ({ ...w }));
+const vals = weeks.map(w => w.total);
+const n = vals.length;
+const medX = median(vals);
+
+const mrs = [];
+for(let i=1;i<n;i++) mrs.push(Math.abs(vals[i]-vals[i-1]));
+const medMR = median(mrs);
+
+const unit = 2.66*medMR/3;
+const UNPL = medX + 2.66*medMR;
+const LNPL = Math.max(0, medX - 2.66*medMR);
+const zone = {
+  upper1: medX + unit,           lower1: Math.max(0, medX - unit),
+  upper2: medX + 2*unit,         lower2: Math.max(0, medX - 2*unit)
+};
+const URL_MR = 3.27 * medMR;
+
+// ---------- Rule detection: X chart (all 4 rules) ----------
+const xFlags = vals.map(()=> new Set());
+for(let i=0;i<n;i++){ if(vals[i] > UNPL || vals[i] < LNPL) xFlags[i].add(1); }
+for(let i=2;i<n;i++){
+  const w=[i-2,i-1,i];
+  const up=w.filter(j=>vals[j]>zone.upper2), lo=w.filter(j=>vals[j]<zone.lower2);
+  if(up.length>=2) up.forEach(j=>xFlags[j].add(2));
+  if(lo.length>=2) lo.forEach(j=>xFlags[j].add(2));
+}
+for(let i=4;i<n;i++){
+  const w=[i-4,i-3,i-2,i-1,i];
+  const up=w.filter(j=>vals[j]>zone.upper1), lo=w.filter(j=>vals[j]<zone.lower1);
+  if(up.length>=3) up.forEach(j=>xFlags[j].add(3));
+  if(lo.length>=3) lo.forEach(j=>xFlags[j].add(3));
+}
+for(let i=7;i<n;i++){
+  const w=[i-7,i-6,i-5,i-4,i-3,i-2,i-1,i];
+  if(w.every(j=>vals[j]>medX) || w.every(j=>vals[j]<medX)) w.forEach(j=>xFlags[j].add(4));
+}
+
+// ---------- Rule detection: mR chart (rule 1 only) ----------
+const mrFlags = mrs.map(()=> new Set());
+mrs.forEach((v,i) => { if(v > URL_MR) mrFlags[i].add(1); });
+
+const xSignalCount = xFlags.filter(s=>s.size>0).length;
+const mrSignalCount = mrFlags.filter(s=>s.size>0).length;
+
+// ---------- Stat strips ----------
+function statHTML(label, value, unit){
+  return `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}${unit?`<span class="unit">${unit}</span>`:''}</div></div>`;
+}
+document.getElementById('xStats').innerHTML =
+  statHTML('Mediana', fmtVal(medX), 'zad./tydz.') +
+  statHTML('UNPL', fmtVal(UNPL), 'zad./tydz.') +
+  statHTML('LNPL', fmtVal(LNPL), 'zad./tydz.') +
+  statHTML('Tygodnie (n)', n, '') +
+  `<div class="stat signals${xSignalCount===0?' zero':''}"><div class="stat-label">Sygnały</div><div class="stat-value">${xSignalCount}</div></div>`;
+
+document.getElementById('mrStats').innerHTML =
+  statHTML('Mediana mR', fmtVal(medMR), 'zad.') +
+  statHTML('URL', fmtVal(URL_MR), 'zad.') +
+  statHTML('Par (n−1)', mrs.length, '') +
+  `<div class="stat signals${mrSignalCount===0?' zero':''}"><div class="stat-label">Sygnały</div><div class="stat-value">${mrSignalCount}</div></div>`;
+
+document.getElementById('xTag').textContent = xSignalCount ? xSignalCount + ' sygnał(y) wykryte' : 'brak sygnałów';
+document.getElementById('mrTag').textContent = mrSignalCount ? mrSignalCount + ' sygnał(y) wykryte' : 'brak sygnałów';
+
+// ---------- X chart ----------
+const xLabels = weeks.map(w => fmtDM(w.weekStart));
+const xCtx = document.getElementById('xChart').getContext('2d');
+
+const xPointStyle = weeks.map(w => w.nDays < 5 ? 'rectRot' : 'circle');
+const xBorderColor = vals.map((v,i) => xFlags[i].size>0 ? '#C44545' : '#1C7C97');
+const xBorderWidth = vals.map((v,i) => xFlags[i].size>0 ? 3 : (weeks[i].nDays<5 ? 2.5 : 1.5));
+const xRadius = vals.map((v,i) => xFlags[i].size>0 ? 7.5 : (weeks[i].nDays<5 ? 6.5 : 5));
+
+function xAnnotations(){
+  const mk = (text) => ({
+    display:true, content:text, position:'start', xAdjust:6,
+    font:{ size:11, weight:'600', family:"'Inter', sans-serif" },
+    padding:{top:3,bottom:3,left:6,right:6}, borderRadius:4
+  });
+  return {
+    z1u: { type:'line', yMin:zone.upper1, yMax:zone.upper1, borderColor:'#94A1AE60', borderWidth:1, borderDash:[2,3] },
+    z1l: { type:'line', yMin:zone.lower1, yMax:zone.lower1, borderColor:'#94A1AE60', borderWidth:1, borderDash:[2,3] },
+    z2u: { type:'line', yMin:zone.upper2, yMax:zone.upper2, borderColor:'#94A1AE90', borderWidth:1, borderDash:[2,3] },
+    z2l: { type:'line', yMin:zone.lower2, yMax:zone.lower2, borderColor:'#94A1AE90', borderWidth:1, borderDash:[2,3] },
+    median: { type:'line', yMin:medX, yMax:medX, borderColor:'#16212E', borderWidth:2,
+      label: Object.assign(mk('Mediana: '+fmtVal(medX)), { backgroundColor:'#16212E', color:'#fff' }) },
+    unpl: { type:'line', yMin:UNPL, yMax:UNPL, borderColor:'#C44545', borderWidth:1.75, borderDash:[8,4],
+      label: Object.assign(mk('UNPL: '+fmtVal(UNPL)), { backgroundColor:'#C44545', color:'#fff' }) },
+    lnpl: { type:'line', yMin:LNPL, yMax:LNPL, borderColor:'#C44545', borderWidth:1.75, borderDash:[8,4],
+      label: Object.assign(mk('LNPL: '+fmtVal(LNPL)), { backgroundColor:'#C44545', color:'#fff' }) }
+  };
+}
+
+const xChart = new Chart(xCtx, {
+  type: 'line',
+  data: {
+    labels: xLabels,
+    datasets: [{
+      label: 'Przepustowość tygodniowa',
+      data: vals,
+      borderColor: '#1C7C9780',
+      backgroundColor: '#1C7C97',
+      pointBackgroundColor: '#1C7C97',
+      pointBorderColor: xBorderColor,
+      pointBorderWidth: xBorderWidth,
+      pointRadius: xRadius,
+      pointHoverRadius: xRadius.map(r=>r+1.5),
+      pointStyle: xPointStyle,
+      borderWidth: 1.5,
+      tension: 0,
+      fill: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'nearest', intersect: true },
+    scales: {
+      x: { grid: { color:'#EEF1F4' }, ticks: { color:'#5C6B7A', font:{ size:11.5, family:"'Inter', sans-serif" } } },
+      y: { beginAtZero: true, grid: { color:'#EEF1F4' },
+        title: { display:true, text:'Zadania / tydzień', color:'#5C6B7A', font:{ size:12, weight:'600', family:"'Inter', sans-serif" } },
+        ticks: { color:'#5C6B7A', font:{ size:11.5, family:"'Inter', sans-serif" } } }
+    },
+    plugins: {
+      legend: { display:false },
+      tooltip: {
+        backgroundColor:'#16212E', padding:10, cornerRadius:7, displayColors:false,
+        titleFont:{ size:12.5, family:"'Inter', sans-serif", weight:'600' },
+        bodyFont:{ size:12.5, family:"'Inter', sans-serif" },
+        callbacks: {
+          title: items => {
+            const w = weeks[items[0].dataIndex];
+            return fmtShort(w.firstDate) + ' – ' + fmtShort(w.lastDate);
+          },
+          label: item => {
+            const w = weeks[item.dataIndex];
+            const base = w.total + ' zadań' + (w.nDays<5 ? (' (tydzień niepełny, '+w.nDays+' dni rob.)') : '');
+            const flags = Array.from(xFlags[item.dataIndex]);
+            return base + (flags.length ? (' · ⚠ sygnał: reguła '+flags.join(', ')) : '');
+          }
+        }
+      },
+      annotation: { annotations: xAnnotations() }
+    }
+  }
+});
+
+// ---------- mR chart ----------
+const mrLabels = weeks.slice(1).map(w => fmtDM(w.weekStart));
+const mrCtx = document.getElementById('mrChart').getContext('2d');
+const mrBorderColor = mrs.map((v,i) => mrFlags[i].size>0 ? '#C44545' : '#1C7C97');
+const mrBorderWidth = mrs.map((v,i) => mrFlags[i].size>0 ? 3 : 1.5);
+const mrRadius = mrs.map((v,i) => mrFlags[i].size>0 ? 7.5 : 5);
+
+function mrAnnotations(){
+  const mk = (text) => ({
+    display:true, content:text, position:'start', xAdjust:6,
+    font:{ size:11, weight:'600', family:"'Inter', sans-serif" },
+    padding:{top:3,bottom:3,left:6,right:6}, borderRadius:4
+  });
+  return {
+    median: { type:'line', yMin:medMR, yMax:medMR, borderColor:'#16212E', borderWidth:2,
+      label: Object.assign(mk('Mediana mR: '+fmtVal(medMR)), { backgroundColor:'#16212E', color:'#fff' }) },
+    url: { type:'line', yMin:URL_MR, yMax:URL_MR, borderColor:'#C44545', borderWidth:1.75, borderDash:[8,4],
+      label: Object.assign(mk('URL: '+fmtVal(URL_MR)), { backgroundColor:'#C44545', color:'#fff' }) }
+  };
+}
+
+const mrChart = new Chart(mrCtx, {
+  type: 'line',
+  data: {
+    labels: mrLabels,
+    datasets: [{
+      label: 'Rozstęp ruchomy (mR)',
+      data: mrs,
+      borderColor: '#1C7C9780',
+      backgroundColor: '#1C7C97',
+      pointBackgroundColor: '#1C7C97',
+      pointBorderColor: mrBorderColor,
+      pointBorderWidth: mrBorderWidth,
+      pointRadius: mrRadius,
+      pointHoverRadius: mrRadius.map(r=>r+1.5),
+      borderWidth: 1.5,
+      tension: 0,
+      fill: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'nearest', intersect: true },
+    scales: {
+      x: { grid: { color:'#EEF1F4' }, ticks: { color:'#5C6B7A', font:{ size:11.5, family:"'Inter', sans-serif" } } },
+      y: { beginAtZero: true, grid: { color:'#EEF1F4' },
+        title: { display:true, text:'|Δ zadań|', color:'#5C6B7A', font:{ size:12, weight:'600', family:"'Inter', sans-serif" } },
+        ticks: { color:'#5C6B7A', font:{ size:11.5, family:"'Inter', sans-serif" } } }
+    },
+    plugins: {
+      legend: { display:false },
+      tooltip: {
+        backgroundColor:'#16212E', padding:10, cornerRadius:7, displayColors:false,
+        titleFont:{ size:12.5, family:"'Inter', sans-serif", weight:'600' },
+        bodyFont:{ size:12.5, family:"'Inter', sans-serif" },
+        callbacks: {
+          title: items => {
+            const w = weeks[items[0].dataIndex+1];
+            return 'mR do tygodnia: ' + fmtShort(w.firstDate) + ' – ' + fmtShort(w.lastDate);
+          },
+          label: item => {
+            const flags = Array.from(mrFlags[item.dataIndex]);
+            return item.raw + ' (|Δ|)' + (flags.length ? (' · ⚠ sygnał: reguła '+flags.join(', ')) : '');
+          }
+        }
+      },
+      annotation: { annotations: mrAnnotations() }
+    }
+  }
+});
+</script>
+</body>
+</html>
